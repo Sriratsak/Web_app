@@ -1,0 +1,144 @@
+/* ตั้งสีพื้นหลัง body */
+body {
+  background: rgb(227, 235, 255) !important; /* สีฟ้าอ่อน */
+  font-family: 'Inter', sans-serif; /* ฟอนต์ Medium */
+}
+
+/* container กลางหน้าจอ */
+.container {
+  display: flex; /* ใช้ flexbox */
+  justify-content: center; /* จัดแนวนอนกลาง */
+  align-items: center;     /* จัดแนวตั้งกลาง */
+  min-height: 100vh;       /* ความสูงเต็มหน้าจอ */
+  padding: 10px;           /* เว้นขอบมือถือ */
+}
+
+/* กล่อง form */
+.groud {
+  background-color: rgb(255, 255, 255);
+  padding: 20px 30px;                  /* เว้นขอบ */
+  border-radius: 12px;                 /* ขอบมน */
+  border: 2px solid rgb(237, 237, 237); /* ขอบบาง */
+  box-shadow: 0 10px 10px rgba(0, 0, 1, 0.1); /* เงา */
+  display: flex; 
+  flex-direction: column; /* จัดลูกเป็นแนวตั้ง */
+  align-items: center;    /* จัดกลางแนวนอน */
+  width: 100%;            /* ยืดตาม parent */
+  max-width: 400px;       /* แต่ไม่เกิน 400px */
+}
+
+/* inner ครอบฟอร์ม */
+.inner {
+  width: 100%; /* ยืดเต็ม parent */
+}
+
+/* Logo */
+.Logo {
+  width: 70px; /* กว้างตายตัว */
+  height: 70px; /* สูงเท่ากับกว้าง */
+  border-radius: 50%; /* ทำเป็นวงกลม */
+  margin: 0 auto 20px; /* กลางและเว้นขอบล่าง */
+  background-color: rgb(219, 234, 254); /* สีฟ้าอ่อน */
+  display: flex; 
+  justify-content: center; 
+  align-items: center;
+  overflow: hidden; /* กันรูปทะลุ */
+}
+
+/* รูป Logo */
+.Logo img {
+  width: 80%;  /* กว้าง 80% ของ container */
+  height: auto; /* สูงอัตโนมัติ */
+}
+
+/* ข้อความหัวข้อ */
+.text {
+  text-align: center; /* กึ่งกลาง */
+}
+
+/* กล่อง label + input */
+.la {
+  text-align: start; /* จัด label ซ้าย */
+  width: 100%;       /* กว้างเต็ม parent */
+  margin-bottom: 18px; /* เว้นระยะ */
+}
+
+/* label */
+.la label {
+  display: block; /* ให้ขึ้นบรรทัดใหม่ */
+  margin-bottom: 5px; /* เว้นระยะจาก input */
+}
+
+/* input ใน .la */
+.la input {
+  width: 100%; /* เต็มความกว้าง parent */
+}
+
+/* input ปกติ */
+input {
+   border: 2px solid rgba(194, 194, 194, 0); /* ไม่มีขอบ */
+   background-color: rgb(243, 243, 245); 
+   border-radius: 7px; 
+   padding: 5px; 
+}
+
+/* focus input */
+input:focus {
+  outline: none; 
+  border: 2px solid #000000; /* ขอบฟ้าเวลา focus */
+}
+
+/* ปุ่ม submit */
+button {
+  width: 100%; 
+  padding: 10px 0px; 
+  color: aliceblue; 
+  background-color: black; 
+  border: none; 
+  border-radius: 10px !important; 
+  cursor: pointer; 
+  transition: 0.2s; /* animation */
+}
+
+/* hover ปุ่ม */
+button:hover {
+  background-color: #333; 
+}
+
+/* active กดปุ่ม */
+button:active {
+  transform: scale(0.98); /* ปุ่มเด้งเล็กน้อย */
+}
+
+/* ลิงก์ */
+.p {
+  margin-top: 15px;
+  text-align: center; 
+}
+
+.p a {
+  text-decoration: none; /* ลบเส้นใต้ */
+  color: #155DFC;         /* สีฟ้า */
+}
+
+/* hover link */
+.p a:hover {
+  color: #2701ff; 
+}
+
+/* paragraph เล็ก */
+.p1 {
+  margin-bottom: 0%; 
+}
+
+/* ---------------- Media Query มือถือ ---------------- */
+@media (max-width: 576px) {
+  .groud {
+    padding: 15px 20px; /* ลด padding */
+  }
+  
+  .Logo {
+    width: 50px;  /* ลด logo มือถือ */
+    height: 50px;
+  }
+}
