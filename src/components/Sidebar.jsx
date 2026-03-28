@@ -9,7 +9,7 @@ export default function Sidebar() {
       <ul className="space-y-2">
         
         <li>
-          <Link to="/" className="block p-2 rounded hover:bg-gray-100">
+          <Link to="/dashboard" className="block p-2 rounded hover:bg-gray-100">
             📊 แดชบอร์ด
           </Link>
         </li>
