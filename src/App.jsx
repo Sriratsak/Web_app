@@ -3,6 +3,8 @@ import Dashboard from "./pages/dashboard";
 import Products from "./pages/Products";
 import Withdraw from "./pages/Withdraw";
 import Receive from "./pages/Receive";
+import Login from "./com/Login";
+import Register from "./com/Register";
 
 function App() {
   return (
@@ -10,6 +12,8 @@ function App() {
       <Routes>
         <Route path="/" element={<Dashboard />} />
         <Route path="/products" element={<Products />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
         <Route path="/withdraw" element={<Withdraw/>} />
         <Route path="/receive" element={<Receive />} />
       </Routes>

@@ -1,7 +1,7 @@
 <?php
     class Database {
         private $host = "localhost";
-        private $db_name = "library_db";
+        private $db_name = "store_management";
         private $username = "root";
         private $password = "";
 
