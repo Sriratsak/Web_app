@@ -77,10 +77,10 @@ export default function Withdraw() {
         <main className="p-8">
           <div className="mb-6">
             <h2 className="text-2xl font-bold">
-              📤 เบิกสินค้าออกจากคลัง
+              📤 รับสินค้าเข้าคลัง
             </h2>
             <p className="text-gray-500 text-sm">
-              กรอกข้อมูลเพื่อเบิกสินค้า
+              กรอกข้อมูลสินค้า
             </p>
           </div>
 
@@ -89,7 +89,7 @@ export default function Withdraw() {
             {/* LEFT - FORM */}
             <div className="bg-white p-8 rounded-2xl shadow-md">
               <h3 className="font-semibold text-lg mb-1">
-                📦 บันทึกการเบิกสินค้า
+                📦 บันทึกการรับสินค้า
               </h3>
               <p className="text-gray-400 text-sm mb-6">
                 กรอกข้อมูลการเบิกสินค้า
@@ -162,7 +162,7 @@ export default function Withdraw() {
                       : "bg-gray-300 text-gray-500 cursor-not-allowed"
                   }`}
                 >
-                  บันทึกการเบิกสินค้า
+                  บันทึกการรับสินค้า
                 </button>
               </div>
             </div>
@@ -170,7 +170,7 @@ export default function Withdraw() {
             {/* RIGHT - HISTORY */}
             <div className="bg-white p-6 rounded-2xl shadow">
               <h3 className="font-semibold mb-1">
-                📜 ประวัติการเบิกสินค้า
+                📜 ประวัติการรับสินค้า
               </h3>
               <p className="text-sm text-gray-400 mb-4">
                 รายการล่าสุด ({history.length} รายการ)
