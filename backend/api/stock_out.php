@@ -5,10 +5,10 @@ header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type, Authorization");
 
 require_once "../Database.php";
-require_once "../Model/Book.php";
+require_once "../Model/StockOut.php"; // เรียกใช้ Model StockOut
 
 $db = (new Database())->getConnection();
-$book = new Book($db);
+$stock = new StockOut($db);
 
 $method = $_SERVER['REQUEST_METHOD'];
 $uri = $_SERVER['REQUEST_URI'];
@@ -17,70 +17,55 @@ $uri = $_SERVER['REQUEST_URI'];
    match id จาก path
 --------------------------- */
 $id = null;
-if(preg_match('#/api/book.php/([0-9]+)$#', $uri, $m)){
+if(preg_match('#/api/stock_out.php/([0-9]+)$#', $uri, $m)){
     $id = $m[1];
 }
 
 $data = json_decode(file_get_contents("php://input"), true);
 
-
 /* ---------------------------
    GET
 --------------------------- */
 if($method == "GET"){
-
     if($id){
-        echo json_encode($book->getById($id));
+        echo json_encode($stock->getById($id));
     }else{
-        echo json_encode($book->getAll());
+        echo json_encode($stock->getAll());
     }
-
 }
 
-
 /* ---------------------------
-   CREATE
+   POST - บันทึกการเบิกสินค้าออก
 --------------------------- */
 if($method == "POST"){
-
-    $result = $book->create(
-        $data['book_title'] ?? '',
-        $data['author'] ?? '',
-        $data['category_id'] ?? null,
-        $data['publish_year'] ?? null
+    $result = $stock->create(
+        $data['prod_id'] ?? '',
+        $data['quantity'] ?? '',
+        $data['user_id'] ?? 1,
+        date("Y-m-d")
     );
-
-    echo json_encode(["success"=>$result]);
-
+    echo json_encode(["success" => $result]);
 }
-
 
 /* ---------------------------
-   UPDATE
+   PUT
 --------------------------- */
 if($method == "PUT" && $id){
-
-    $result = $book->update(
+    $result = $stock->update(
         $id,
-        $data['book_title'] ?? '',
-        $data['author'] ?? '',
-        $data['category_id'] ?? null,
-        $data['publish_year'] ?? null
+        $data['prod_id'] ?? '',
+        $data['quantity'] ?? '',
+        $data['user_id'] ?? 1,
+        $data['date'] ?? ''
     );
-
-    echo json_encode(["success"=>$result]);
-
+    echo json_encode(["success" => $result]);
 }
-
 
 /* ---------------------------
    DELETE
 --------------------------- */
 if($method == "DELETE" && $id){
-
-    $result = $book->delete($id);
-    echo json_encode(["success"=>$result]);
-
+    $result = $stock->delete($id);
+    echo json_encode(["success" => $result]);
 }
-
 ?>
