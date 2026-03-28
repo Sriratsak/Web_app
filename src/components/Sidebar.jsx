@@ -31,9 +31,6 @@ export default function Sidebar() {
             <Link to="/receive"  className="block p-2 rounded hover:bg-gray-100">
             📥 เบิกสินค้าออกจากคลัง
             </Link>
-            <Link to="/login"  className="block p-2 rounded hover:bg-gray-100">
-            📥 login
-            </Link>
         </li>
 
       </ul>

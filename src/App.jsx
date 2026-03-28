@@ -5,14 +5,17 @@ import Withdraw from "./pages/Withdraw";
 import Receive from "./pages/Receive";
 import Login from "./com/Login";
 import Register from "./com/Register";
+import Admin from "./admin/admin";
 
 function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<Dashboard />} />
-        <Route path="/products" element={<Products />} />
+        <Route path="/" element={<Login />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/products" element={<Products />} />
+        <Route path="/admin" element={<Admin />} />
         <Route path="/register" element={<Register />} />
         <Route path="/withdraw" element={<Withdraw/>} />
         <Route path="/receive" element={<Receive />} />
