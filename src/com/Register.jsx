@@ -20,7 +20,7 @@ function Register() {
 
     try {
       const reg = await axios.post(
-        "http://localhost/React/Web_app/backend/api/member.php/register",
+        "http://localhost/Web_app/backend/api/member.php/register",
         {
           name: username,
           password: password,
