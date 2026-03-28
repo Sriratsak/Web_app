@@ -1,30 +1,19 @@
-import { useState } from "react";
-import reactLogo from "./assets/react.svg";
-import viteLogo from "./assets/vite.svg";
-import heroImg from "./assets/hero.png";
-import "./App.css";
-import { Routes, Route, Link } from "react-router-dom";
-import Login from "./com/Login";
-import Register from "./com/Register";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import Dashboard from "./pages/dashboard";
+import Products from "./pages/Products";
+import Withdraw from "./pages/Withdraw";
+import Receive from "./pages/Receive";
 
-// function Home() ลบได้ถ้าจะทำหน้า App เป็น แดชบอร์ด 
-function Home() {
-  return (
-    <>
-      <h1>Home</h1>
-      <Link to="/login">Login</Link>
-      <Link to="/register">Register</Link>
-    </>
-  );
-}
-// -----------------------------------------------------
 function App() {
   return (
-    <Routes>
-      <Route path="/" element={<Home />} />
-      <Route path="/login" element={<Login />} />
-      <Route path="/register" element={<Register />} />
-    </Routes>
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<Dashboard />} />
+        <Route path="/products" element={<Products />} />
+        <Route path="/withdraw" element={<Withdraw/>} />
+        <Route path="/receive" element={<Receive />} />
+      </Routes>
+    </BrowserRouter>
   );
 }
 
