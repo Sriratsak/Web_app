@@ -1,5 +1,6 @@
 import { useState } from "react";
 import Sidebar from "../components/Sidebar";
+import Navbar from "../components/Navbar"; // ✅ 1. Import Navbar เข้ามา
 
 export default function Withdraw() {
   // 1. ข้อมูลสินค้า (Mockup)
@@ -47,7 +48,6 @@ export default function Withdraw() {
     );
   };
 
-  // 📂 ตรวจสอบก่อนเปิด Modal
   const handlePreSubmit = () => {
     if (selectedItems.length === 0) {
       alert("อ้วงลืมเลือกของที่จะเบิกนะ! เลือกก่อนจ้า");
@@ -73,7 +73,6 @@ export default function Withdraw() {
     const dateKey = now.toISOString().split('T')[0];
     const timeDisplay = now.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' });
 
-    // ➖ อัปเดตสต็อก (ลบจำนวนออก)
     const updatedProducts = products.map((p) => {
       const selected = selectedItems.find((i) => i.id === p.id);
       return selected ? { ...p, stock: p.stock - selected.qty } : p;
@@ -100,145 +99,151 @@ export default function Withdraw() {
   return (
     <div className="flex min-h-screen bg-gray-100 font-sans text-gray-900">
       <Sidebar />
+      
+      {/* ✅ 2. ปรับ Wrapper ฝั่งขวาให้มี Navbar อยู่บนสุด */}
+      <div className="flex-1 flex flex-col">
+        
+        <Navbar /> {/* 🟢 เรียกใช้ Navbar ตรงนี้จ้าอ้วง */}
 
-      <div className="flex-1 p-8">
-        <header className="mb-6">
-          <h2 className="text-2xl font-bold mb-1">📤 บันทึกการเบิกสินค้า</h2>
-          <p className="text-gray-500">บันทึกรายการนำสินค้าออกจากคลังและตัดยอดสต็อก</p>
-        </header>
+        <main className="p-8 overflow-y-auto">
+          <header className="mb-6">
+            <h2 className="text-2xl font-bold mb-1">📤 บันทึกการเบิกสินค้า</h2>
+            <p className="text-gray-500">บันทึกรายการนำสินค้าออกจากคลังและตัดยอดสต็อก</p>
+          </header>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
-          
-          {/* --- ฝั่งซ้าย: ฟอร์มเลือกสินค้า --- */}
-          <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-200">
-            <div className="space-y-4 mb-6">
-              <input
-                type="text"
-                placeholder="🔍 ค้นหาสินค้าเพื่อเบิก..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="w-full border-0 bg-gray-50 px-5 py-3 rounded-2xl focus:ring-2 focus:ring-red-500 outline-none transition-all"
-              />
-              <div className="flex gap-3">
-                <select
-                  value={selectedCategory}
-                  onChange={(e) => setSelectedCategory(e.target.value)}
-                  className="border-0 bg-gray-50 px-4 py-2 rounded-2xl text-sm focus:ring-2 focus:ring-red-500 outline-none cursor-pointer"
-                >
-                  {categories.map((cat) => (
-                    <option key={cat} value={cat}>{cat === "all" ? "ทุกหมวดหมู่" : cat}</option>
-                  ))}
-                </select>
-                <button
-                  onClick={() => setShowPopular(!showPopular)}
-                  className={`px-5 py-2 rounded-2xl text-sm font-medium border transition-all ${
-                    showPopular ? "bg-red-600 text-white border-red-600" : "bg-white text-gray-500 border-gray-200"
-                  }`}
-                >
-                  ⭐ ใช้บ่อย
-                </button>
-              </div>
-            </div>
-
-            <div className="max-h-80 overflow-y-auto space-y-2 border-0 bg-gray-50 rounded-2xl p-4 mb-6 custom-scrollbar">
-              {filteredProducts.map((item) => {
-                const selected = selectedItems.find(i => i.id === item.id);
-                const isOutOfStock = item.stock <= 0;
-
-                return (
-                  <div
-                    key={item.id}
-                    className={`flex justify-between items-center p-3 rounded-2xl border-2 transition-all ${
-                      selected ? "bg-white border-red-500 shadow-md" : "bg-transparent border-transparent"
-                    } ${isOutOfStock ? "opacity-50" : ""}`}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+            
+            {/* --- ฝั่งซ้าย: ฟอร์มเลือกสินค้า --- */}
+            <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-200">
+              <div className="space-y-4 mb-6">
+                <input
+                  type="text"
+                  placeholder="🔍 ค้นหาสินค้าเพื่อเบิก..."
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  className="w-full border-0 bg-gray-50 px-5 py-3 rounded-2xl focus:ring-2 focus:ring-red-500 outline-none transition-all"
+                />
+                <div className="flex gap-3">
+                  <select
+                    value={selectedCategory}
+                    onChange={(e) => setSelectedCategory(e.target.value)}
+                    className="border-0 bg-gray-50 px-4 py-2 rounded-2xl text-sm focus:ring-2 focus:ring-red-500 outline-none cursor-pointer"
                   >
-                    <div 
-                      className={`flex items-center gap-4 cursor-pointer select-none ${isOutOfStock ? "cursor-not-allowed" : ""}`} 
-                      onClick={() => !isOutOfStock && toggleProduct(item)}
-                    >
-                      <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all ${selected ? "bg-red-500 border-red-500" : "border-gray-300"}`}>
-                        {selected && <div className="w-2 h-2 bg-white rounded-full"></div>}
-                      </div>
-                      <div>
-                        <p className="font-bold text-sm">{item.name}</p>
-                        <p className={`text-xs ${isOutOfStock ? "text-red-500 font-bold" : "text-gray-400"}`}>
-                          {isOutOfStock ? "สินค้าหมด" : `คงเหลือ ${item.stock} หน่วย`}
-                        </p>
-                      </div>
-                    </div>
-                    {selected && (
-                      <div className="flex items-center gap-2">
-                        <span className="text-xs text-gray-400 font-medium">เบิก:</span>
-                        <input
-                          type="number"
-                          min="1"
-                          max={item.stock}
-                          value={selected.qty}
-                          onChange={(e) => updateQty(item.id, e.target.value)}
-                          className="w-16 bg-gray-100 border-0 px-2 py-1.5 rounded-xl text-center font-bold focus:ring-1 focus:ring-red-500 outline-none"
-                        />
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-
-            <textarea
-              placeholder="เหตุผลการเบิก / หมายเหตุ..."
-              value={note}
-              onChange={(e) => setNote(e.target.value)}
-              className="w-full border-0 bg-gray-50 p-4 rounded-2xl min-h-[100px] focus:ring-1 focus:ring-red-500 outline-none text-sm mb-4"
-            />
-            <button
-              onClick={handlePreSubmit}
-              className="w-full bg-red-600 text-white py-4 rounded-2xl font-bold text-lg hover:bg-red-700 transition-all shadow-xl shadow-red-100 active:scale-[0.98]"
-            >
-              บันทึกการเบิกสินค้า
-            </button>
-          </div>
-
-          {/* --- ฝั่งขวา: ประวัติ (ล็อกขนาดพร้อม Scrollbar) --- */}
-          <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-200 flex flex-col h-[650px]">
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-3 flex-none">
-              <h3 className="font-bold text-lg flex items-center gap-2">📜 ประวัติการเบิก</h3>
-              <input 
-                type="date" 
-                value={filterDate}
-                onChange={(e) => setFilterDate(e.target.value)}
-                className="border-0 bg-gray-100 px-4 py-2 rounded-xl text-sm focus:ring-2 focus:ring-black outline-none"
-              />
-            </div>
-
-            <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar space-y-3">
-              {filteredHistory.length === 0 ? (
-                <div className="text-center py-24 text-gray-300">
-                  <p className="text-5xl mb-4">📅</p>
-                  <p className="text-sm">ไม่มีประวัติการเบิกในวันที่เลือก</p>
+                    {categories.map((cat) => (
+                      <option key={cat} value={cat}>{cat === "all" ? "ทุกหมวดหมู่" : cat}</option>
+                    ))}
+                  </select>
+                  <button
+                    onClick={() => setShowPopular(!showPopular)}
+                    className={`px-5 py-2 rounded-2xl text-sm font-medium border transition-all ${
+                      showPopular ? "bg-red-600 text-white border-red-600" : "bg-white text-gray-500 border-gray-200"
+                    }`}
+                  >
+                    ⭐ ใช้บ่อย
+                  </button>
                 </div>
-              ) : (
-                filteredHistory.map((item, i) => (
-                  <div key={i} className="bg-gray-50 p-4 rounded-2xl flex justify-between items-center border border-gray-50 hover:border-red-200 transition-all">
-                    <div>
-                      <p className="font-bold text-gray-800">{item.name}</p>
-                      <p className="text-[10px] text-gray-400 font-medium uppercase tracking-widest mt-0.5">
-                        🕙 เวลา {item.displayTime} น.
-                      </p>
-                      {item.note && (
-                        <p className="text-xs text-red-400 mt-2 bg-red-50 px-2 py-1 rounded-lg w-fit">
-                          📝 {item.note}
-                        </p>
+              </div>
+
+              <div className="max-h-80 overflow-y-auto space-y-2 border-0 bg-gray-50 rounded-2xl p-4 mb-6 custom-scrollbar">
+                {filteredProducts.map((item) => {
+                  const selected = selectedItems.find(i => i.id === item.id);
+                  const isOutOfStock = item.stock <= 0;
+
+                  return (
+                    <div
+                      key={item.id}
+                      className={`flex justify-between items-center p-3 rounded-2xl border-2 transition-all ${
+                        selected ? "bg-white border-red-500 shadow-md" : "bg-transparent border-transparent"
+                      } ${isOutOfStock ? "opacity-50" : ""}`}
+                    >
+                      <div 
+                        className={`flex items-center gap-4 cursor-pointer select-none ${isOutOfStock ? "cursor-not-allowed" : ""}`} 
+                        onClick={() => !isOutOfStock && toggleProduct(item)}
+                      >
+                        <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all ${selected ? "bg-red-500 border-red-500" : "border-gray-300"}`}>
+                          {selected && <div className="w-2 h-2 bg-white rounded-full"></div>}
+                        </div>
+                        <div>
+                          <p className="font-bold text-sm">{item.name}</p>
+                          <p className={`text-xs ${isOutOfStock ? "text-red-500 font-bold" : "text-gray-400"}`}>
+                            {isOutOfStock ? "สินค้าหมด" : `คงเหลือ ${item.stock} หน่วย`}
+                          </p>
+                        </div>
+                      </div>
+                      {selected && (
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs text-gray-400 font-medium">เบิก:</span>
+                          <input
+                            type="number"
+                            min="1"
+                            max={item.stock}
+                            value={selected.qty}
+                            onChange={(e) => updateQty(item.id, e.target.value)}
+                            className="w-16 bg-gray-100 border-0 px-2 py-1.5 rounded-xl text-center font-bold focus:ring-1 focus:ring-red-500 outline-none"
+                          />
+                        </div>
                       )}
                     </div>
-                    <div className="bg-red-100 text-red-700 px-4 py-2 rounded-2xl font-black">
-                      -{item.qty}
-                    </div>
+                  );
+                })}
+              </div>
+
+              <textarea
+                placeholder="เหตุผลการเบิก / หมายเหตุ..."
+                value={note}
+                onChange={(e) => setNote(e.target.value)}
+                className="w-full border-0 bg-gray-50 p-4 rounded-2xl min-h-[100px] focus:ring-1 focus:ring-red-500 outline-none text-sm mb-4"
+              />
+              <button
+                onClick={handlePreSubmit}
+                className="w-full bg-red-600 text-white py-4 rounded-2xl font-bold text-lg hover:bg-red-700 transition-all shadow-xl shadow-red-100 active:scale-[0.98]"
+              >
+                บันทึกการเบิกสินค้า
+              </button>
+            </div>
+
+            {/* --- ฝั่งขวา: ประวัติ --- */}
+            <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-200 flex flex-col h-[650px]">
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-3 flex-none">
+                <h3 className="font-bold text-lg flex items-center gap-2">📜 ประวัติการเบิก</h3>
+                <input 
+                  type="date" 
+                  value={filterDate}
+                  onChange={(e) => setFilterDate(e.target.value)}
+                  className="border-0 bg-gray-100 px-4 py-2 rounded-xl text-sm focus:ring-2 focus:ring-black outline-none"
+                />
+              </div>
+
+              <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar space-y-3">
+                {filteredHistory.length === 0 ? (
+                  <div className="text-center py-24 text-gray-300">
+                    <p className="text-5xl mb-4">📅</p>
+                    <p className="text-sm">ไม่มีประวัติการเบิกในวันที่เลือก</p>
                   </div>
-                ))
-              )}
+                ) : (
+                  filteredHistory.map((item, i) => (
+                    <div key={i} className="bg-gray-50 p-4 rounded-2xl flex justify-between items-center border border-gray-50 hover:border-red-200 transition-all">
+                      <div>
+                        <p className="font-bold text-gray-800">{item.name}</p>
+                        <p className="text-[10px] text-gray-400 font-medium uppercase tracking-widest mt-0.5">
+                          🕙 เวลา {item.displayTime} น.
+                        </p>
+                        {item.note && (
+                          <p className="text-xs text-red-400 mt-2 bg-red-50 px-2 py-1 rounded-lg w-fit">
+                            📝 {item.note}
+                          </p>
+                        )}
+                      </div>
+                      <div className="bg-red-100 text-red-700 px-4 py-2 rounded-2xl font-black">
+                        -{item.qty}
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
             </div>
           </div>
-        </div>
+        </main>
       </div>
 
       {/* --- MODAL ยืนยันการเบิก --- */}
