@@ -11,7 +11,7 @@ function Login() {
 
     try {
       const response = await axios.post(
-        "http://localhost/React/Web_app/backend/api/member.php/login",
+        "http://localhost/Web_app/backend/api/member.php/login",
         {
           email: email,
           password: password,
