@@ -1,8 +1,9 @@
 import { useState } from "react";
 import Sidebar from "../components/Sidebar";
+import Navbar from "../components/Navbar"; // ✅ 1. Import Navbar เข้ามาจ้า
 
 export default function Receive() {
-  // 1. ข้อมูลสินค้า (ในอนาคตเปลี่ยนเป็นดึงจาก API)
+  // 1. ข้อมูลสินค้า
   const [products, setProducts] = useState([
     { id: 1, name: "ข้าวสาร", stock: 10, category: "อาหาร", popular: true },
     { id: 2, name: "น้ำปลา", stock: 5, category: "อาหาร", popular: true },
@@ -13,7 +14,7 @@ export default function Receive() {
     { id: 7, name: "ผงซักฟอก", stock: 20, category: "ของใช้", popular: false },
   ]);
 
-  // 2. States สำหรับการจัดการฟอร์มและฟิลเตอร์
+  // 2. States สำหรับจัดการข้อมูล
   const [search, setSearch] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [showPopular, setShowPopular] = useState(true);
@@ -23,7 +24,6 @@ export default function Receive() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [filterDate, setFilterDate] = useState(new Date().toISOString().split('T')[0]);
 
-  // ดึงหมวดหมู่ที่ไม่ซ้ำกันออกมาทำ Dropdown
   const categories = ["all", ...new Set(products.map(p => p.category))];
 
   // 3. Logic การกรองสินค้า
@@ -34,7 +34,6 @@ export default function Receive() {
     return matchSearch && matchCategory && matchPopular;
   });
 
-  // 4. การจัดการเลือกสินค้า
   const toggleProduct = (product) => {
     const exists = selectedItems.find((i) => i.id === product.id);
     if (exists) {
@@ -52,7 +51,6 @@ export default function Receive() {
     );
   };
 
-  // 5. การบันทึกข้อมูล
   const handlePreSubmit = () => {
     if (selectedItems.length === 0) {
       alert("อ้วงลืมเลือกสินค้าหรือเปล่า? เลือกก่อนบันทึกนะจ๊ะ");
@@ -72,7 +70,6 @@ export default function Receive() {
     const dateKey = now.toISOString().split('T')[0]; 
     const timeDisplay = now.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' });
 
-    // อัปเดตสต็อกในเครื่อง (บวกเพิ่ม)
     const updatedProducts = products.map((p) => {
       const selected = selectedItems.find((i) => i.id === p.id);
       return selected ? { ...p, stock: p.stock + selected.qty } : p;
@@ -80,7 +77,6 @@ export default function Receive() {
 
     setProducts(updatedProducts);
 
-    // เพิ่มลงประวัติ
     const newHistory = selectedItems.map((item) => ({
       name: item.name,
       qty: item.qty,
@@ -95,158 +91,160 @@ export default function Receive() {
     setIsModalOpen(false);
   };
 
-  // กรองประวัติแสดงตามวันที่เลือก
   const filteredHistory = history.filter(item => item.fullDate === filterDate);
 
   return (
     <div className="flex min-h-screen bg-gray-100 font-sans text-gray-900">
       <Sidebar />
 
-      <div className="flex-1 p-8">
-        <header className="mb-6">
-          <h2 className="text-2xl font-bold mb-1">📥 รับสินค้าเข้าคลัง</h2>
-          <p className="text-gray-500">เพิ่มจำนวนสต็อกสินค้าเข้าระบบจัดการคลัง</p>
-        </header>
+      {/* ✅ 2. Wrapper ฝั่งขวาพร้อม Navbar */}
+      <div className="flex-1 flex flex-col">
+        
+        <Navbar /> {/* 🟢 เรียกใช้ Navbar ตรงนี้เลยอ้วง */}
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
-          
-          {/* --- ฝั่งซ้าย: ฟอร์มเลือกสินค้า --- */}
-          <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-200">
-            <div className="space-y-4 mb-6">
-              <input
-                type="text"
-                placeholder="🔍 ค้นชื่อสินค้าที่ต้องการรับเข้า..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="w-full border-0 bg-gray-50 px-5 py-3 rounded-2xl focus:ring-2 focus:ring-green-500 outline-none transition-all"
-              />
-              
-              <div className="flex gap-3">
-                <select
-                  value={selectedCategory}
-                  onChange={(e) => setSelectedCategory(e.target.value)}
-                  className="border-0 bg-gray-50 px-4 py-2 rounded-2xl text-sm focus:ring-2 focus:ring-green-500 outline-none cursor-pointer"
-                >
-                  {categories.map((cat) => (
-                    <option key={cat} value={cat}>
-                      {cat === "all" ? "ทุกหมวดหมู่" : cat}
-                    </option>
-                  ))}
-                </select>
+        <main className="p-8 overflow-y-auto">
+          <header className="mb-6">
+            <h2 className="text-2xl font-bold mb-1">📥 รับสินค้าเข้าคลัง</h2>
+            <p className="text-gray-500">เพิ่มจำนวนสต็อกสินค้าเข้าระบบจัดการคลัง</p>
+          </header>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+            
+            {/* LEFT: ฟอร์มเลือกสินค้า */}
+            <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-200">
+              <div className="space-y-4 mb-6">
+                <input
+                  type="text"
+                  placeholder="🔍 ค้นชื่อสินค้าที่ต้องการรับเข้า..."
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  className="w-full border-0 bg-gray-50 px-5 py-3 rounded-2xl focus:ring-2 focus:ring-green-500 outline-none transition-all"
+                />
                 
-                <button
-                  onClick={() => setShowPopular(!showPopular)}
-                  className={`px-5 py-2 rounded-2xl text-sm font-medium border transition-all ${
-                    showPopular ? "bg-black text-white border-black" : "bg-white text-gray-500 border-gray-200"
-                  }`}
-                >
-                  ⭐ ใช้บ่อย
-                </button>
-              </div>
-            </div>
-
-            {/* รายการสินค้าที่เลือกได้ */}
-            <div className="max-h-80 overflow-y-auto space-y-2 border-0 bg-gray-50 rounded-2xl p-4 mb-6 custom-scrollbar">
-              {filteredProducts.map((item) => {
-                const selected = selectedItems.find(i => i.id === item.id);
-                return (
-                  <div
-                    key={item.id}
-                    className={`flex justify-between items-center p-3 rounded-2xl border-2 transition-all ${
-                      selected ? "bg-white border-green-500 shadow-md" : "bg-transparent border-transparent"
+                <div className="flex gap-3">
+                  <select
+                    value={selectedCategory}
+                    onChange={(e) => setSelectedCategory(e.target.value)}
+                    className="border-0 bg-gray-50 px-4 py-2 rounded-2xl text-sm focus:ring-2 focus:ring-green-500 outline-none cursor-pointer"
+                  >
+                    {categories.map((cat) => (
+                      <option key={cat} value={cat}>
+                        {cat === "all" ? "ทุกหมวดหมู่" : cat}
+                      </option>
+                    ))}
+                  </select>
+                  
+                  <button
+                    onClick={() => setShowPopular(!showPopular)}
+                    className={`px-5 py-2 rounded-2xl text-sm font-medium border transition-all ${
+                      showPopular ? "bg-black text-white border-black" : "bg-white text-gray-500 border-gray-200"
                     }`}
                   >
-                    <div 
-                      className="flex items-center gap-4 cursor-pointer select-none" 
-                      onClick={() => toggleProduct(item)}
-                    >
-                      <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all ${selected ? "bg-green-500 border-green-500" : "border-gray-300"}`}>
-                        {selected && <div className="w-2 h-2 bg-white rounded-full"></div>}
-                      </div>
-                      <div>
-                        <p className="font-bold text-sm">{item.name}</p>
-                        <p className="text-xs text-gray-400">สต็อกปัจจุบัน: {item.stock}</p>
-                      </div>
-                    </div>
-                    
-                    {selected && (
-                      <div className="flex items-center gap-2">
-                        <span className="text-xs text-gray-400 font-medium">จำนวน:</span>
-                        <input
-                          type="number"
-                          min="1"
-                          value={selected.qty}
-                          onChange={(e) => updateQty(item.id, e.target.value)}
-                          className="w-16 bg-gray-100 border-0 px-2 py-1.5 rounded-xl text-center font-bold focus:ring-1 focus:ring-green-500 outline-none"
-                        />
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-
-            <textarea
-              placeholder="เขียนบันทึกเพิ่มเติม (ถ้ามี)..."
-              value={note}
-              onChange={(e) => setNote(e.target.value)}
-              className="w-full border-0 bg-gray-50 p-4 rounded-2xl min-h-[100px] focus:ring-1 focus:ring-green-500 outline-none text-sm mb-4"
-            />
-            
-            <button
-              onClick={handlePreSubmit}
-              className="w-full bg-green-600 text-white py-4 rounded-2xl font-bold text-lg hover:bg-green-700 transition-all shadow-xl shadow-green-100 active:scale-[0.98]"
-            >
-              ยืนยันการรับเข้า
-            </button>
-          </div>
-
-          {/* --- ฝั่งขวา: ประวัติ (ล็อกขนาดพร้อม Scrollbar) --- */}
-          <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-200 flex flex-col h-[650px]">
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-3 flex-none">
-              <h3 className="font-bold text-lg flex items-center gap-2">📜 ประวัติรับสินค้า</h3>
-              <input 
-                type="date" 
-                value={filterDate}
-                onChange={(e) => setFilterDate(e.target.value)}
-                className="border-0 bg-gray-100 px-4 py-2 rounded-xl text-sm focus:ring-2 focus:ring-black outline-none"
-              />
-            </div>
-
-            {/* ส่วนที่ Scroll ได้ */}
-            <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar space-y-3">
-              {filteredHistory.length === 0 ? (
-                <div className="text-center py-24 text-gray-300">
-                  <p className="text-5xl mb-4">📅</p>
-                  <p className="text-sm">ไม่มีรายการประวัติในวันที่เลือก</p>
+                    ⭐ ใช้บ่อย
+                  </button>
                 </div>
-              ) : (
-                filteredHistory.map((item, i) => (
-                  <div key={i} className="bg-gray-50 p-4 rounded-2xl flex justify-between items-center border border-gray-50 hover:border-green-200 transition-all">
-                    <div>
-                      <p className="font-bold text-gray-800">{item.name}</p>
-                      <p className="text-[10px] text-gray-400 font-medium uppercase tracking-widest mt-0.5">
-                        🕙 {item.displayTime} น.
-                      </p>
-                      {item.note && (
-                        <p className="text-xs text-blue-500 mt-2 bg-blue-50 px-2 py-1 rounded-lg w-fit">
-                          📝 {item.note}
-                        </p>
+              </div>
+
+              <div className="max-h-80 overflow-y-auto space-y-2 border-0 bg-gray-50 rounded-2xl p-4 mb-6 custom-scrollbar">
+                {filteredProducts.map((item) => {
+                  const selected = selectedItems.find(i => i.id === item.id);
+                  return (
+                    <div
+                      key={item.id}
+                      className={`flex justify-between items-center p-3 rounded-2xl border-2 transition-all ${
+                        selected ? "bg-white border-green-500 shadow-md" : "bg-transparent border-transparent"
+                      }`}
+                    >
+                      <div 
+                        className="flex items-center gap-4 cursor-pointer select-none" 
+                        onClick={() => toggleProduct(item)}
+                      >
+                        <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all ${selected ? "bg-green-500 border-green-500" : "border-gray-300"}`}>
+                          {selected && <div className="w-2 h-2 bg-white rounded-full"></div>}
+                        </div>
+                        <div>
+                          <p className="font-bold text-sm">{item.name}</p>
+                          <p className="text-xs text-gray-400">สต็อกปัจจุบัน: {item.stock}</p>
+                        </div>
+                      </div>
+                      
+                      {selected && (
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs text-gray-400 font-medium">จำนวน:</span>
+                          <input
+                            type="number"
+                            min="1"
+                            value={selected.qty}
+                            onChange={(e) => updateQty(item.id, e.target.value)}
+                            className="w-16 bg-gray-100 border-0 px-2 py-1.5 rounded-xl text-center font-bold focus:ring-1 focus:ring-green-500 outline-none"
+                          />
+                        </div>
                       )}
                     </div>
-                    <div className="bg-green-100 text-green-700 px-4 py-2 rounded-2xl font-black">
-                      +{item.qty}
-                    </div>
+                  );
+                })}
+              </div>
+
+              <textarea
+                placeholder="เขียนบันทึกเพิ่มเติม (ถ้ามี)..."
+                value={note}
+                onChange={(e) => setNote(e.target.value)}
+                className="w-full border-0 bg-gray-50 p-4 rounded-2xl min-h-[100px] focus:ring-1 focus:ring-green-500 outline-none text-sm mb-4"
+              />
+              
+              <button
+                onClick={handlePreSubmit}
+                className="w-full bg-green-600 text-white py-4 rounded-2xl font-bold text-lg hover:bg-green-700 transition-all shadow-xl shadow-green-100 active:scale-[0.98]"
+              >
+                ยืนยันการรับเข้า
+              </button>
+            </div>
+
+            {/* RIGHT: ประวัติ (ล็อกขนาดพร้อม Scrollbar) */}
+            <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-200 flex flex-col h-[650px]">
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-3 flex-none">
+                <h3 className="font-bold text-lg flex items-center gap-2">📜 ประวัติรับสินค้า</h3>
+                <input 
+                  type="date" 
+                  value={filterDate}
+                  onChange={(e) => setFilterDate(e.target.value)}
+                  className="border-0 bg-gray-100 px-4 py-2 rounded-xl text-sm focus:ring-2 focus:ring-black outline-none"
+                />
+              </div>
+
+              <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar space-y-3">
+                {filteredHistory.length === 0 ? (
+                  <div className="text-center py-24 text-gray-300">
+                    <p className="text-5xl mb-4">📅</p>
+                    <p className="text-sm">ไม่มีรายการประวัติในวันที่เลือก</p>
                   </div>
-                ))
-              )}
+                ) : (
+                  filteredHistory.map((item, i) => (
+                    <div key={i} className="bg-gray-50 p-4 rounded-2xl flex justify-between items-center border border-gray-50 hover:border-green-200 transition-all">
+                      <div>
+                        <p className="font-bold text-gray-800">{item.name}</p>
+                        <p className="text-[10px] text-gray-400 font-medium uppercase tracking-widest mt-0.5">
+                          🕙 {item.displayTime} น.
+                        </p>
+                        {item.note && (
+                          <p className="text-xs text-blue-500 mt-2 bg-blue-50 px-2 py-1 rounded-lg w-fit">
+                            📝 {item.note}
+                          </p>
+                        )}
+                      </div>
+                      <div className="bg-green-100 text-green-700 px-4 py-2 rounded-2xl font-black">
+                        +{item.qty}
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
             </div>
           </div>
-
-        </div>
+        </main>
       </div>
 
-      {/* --- MODAL ยืนยันรายการ --- */}
+      {/* MODAL ยืนยันรายการ */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/40 backdrop-blur-md animate-fade-in" onClick={() => setIsModalOpen(false)}></div>
@@ -284,7 +282,7 @@ export default function Receive() {
         </div>
       )}
 
-      {/* CSS สำหรับ Scrollbar เล็กน้อย */}
+      {/* Scrollbar Customization */}
       <style dangerouslySetInnerHTML={{ __html: `
         .custom-scrollbar::-webkit-scrollbar { width: 5px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
