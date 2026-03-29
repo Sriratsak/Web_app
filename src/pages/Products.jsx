@@ -147,26 +147,39 @@ export default function Products() {
                 ไม่พบข้อมูลสินค้า
               </div>
             ) : (
-              <table className="w-full table-auto border-collapse border border-gray-200">
-                <thead>
-                  <tr className="bg-gray-100">
-                    <th className="border px-4 py-2 text-left">ชื่อสินค้า</th>
-                    <th className="border px-4 py-2 text-right">ราคา</th>
-                    <th className="border px-4 py-2 text-right">จำนวน</th>
-                    <th className="border px-4 py-2 text-left">หมวดหมู่</th>
+              <table className="w-full border-collapse shadow-lg rounded-xl overflow-hidden">
+                <thead className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white">
+                  <tr>
+                    <th className="px-6 py-3 text-left uppercase tracking-wider">
+                      ชื่อสินค้า
+                    </th>
+                    <th className="px-6 py-3 text-right uppercase tracking-wider">
+                      ราคา
+                    </th>
+                    <th className="px-6 py-3 text-right uppercase tracking-wider">
+                      จำนวน
+                    </th>
+                    <th className="px-6 py-3 text-left uppercase tracking-wider">
+                      หมวดหมู่
+                    </th>
                   </tr>
                 </thead>
-                <tbody>
+                <tbody className="bg-white divide-y divide-gray-200">
                   {products.map((p, idx) => (
-                    <tr key={idx} className="hover:bg-gray-50">
-                      <td className="border px-4 py-2">{p.prod_name}</td>
-                      <td className="border px-4 py-2 text-right">
-                        {p.prod_price}
+                    <tr
+                      key={idx}
+                      className="hover:bg-gray-100 transition-colors duration-200"
+                    >
+                      <td className="px-6 py-4 text-gray-800 font-medium">
+                        {p.prod_name}
                       </td>
-                      <td className="border px-4 py-2 text-right">
+                      <td className="px-6 py-4 text-right text-green-600 font-semibold">
+                        {p.prod_price.toLocaleString()}
+                      </td>
+                      <td className="px-6 py-4 text-right text-gray-700">
                         {p.prod_capacity}
                       </td>
-                      <td className="border px-4 py-2">{p.cat_name}</td>
+                      <td className="px-6 py-4 text-gray-600">{p.cat_name}</td>
                     </tr>
                   ))}
                 </tbody>

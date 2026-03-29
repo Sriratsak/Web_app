@@ -1,71 +1,58 @@
 <?php
+ini_set('session.cookie_samesite', 'None');
+ini_set('session.cookie_secure', '0');
+session_start();
+
 header("Content-Type: application/json");
-header("Access-Control-Allow-Origin: *"); 
+header("Access-Control-Allow-Origin: http://localhost:5173");
 header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS");
-header("Access-Control-Allow-Headers: Content-Type, Authorization");
+header("Access-Control-Allow-Headers: Content-Type");
+header("Access-Control-Allow-Credentials: true");
+
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') { http_response_code(200); exit; }
 
 require_once "../Database.php";
-require_once "../Model/StockIn.php"; // เรียกใช้ Model StockIn
+require_once "../Model/StockIn.php";
 
-$db = (new Database())->getConnection();
+$db    = (new Database())->getConnection();
 $stock = new StockIn($db);
 
 $method = $_SERVER['REQUEST_METHOD'];
-$uri = $_SERVER['REQUEST_URI'];
+$uri    = $_SERVER['REQUEST_URI'];
+$data   = json_decode(file_get_contents("php://input"), true) ?? [];
 
-/* ---------------------------
-   match id จาก path (เช่น /api/stock_in.php/123)
---------------------------- */
 $id = null;
-if(preg_match('#/api/stock_in.php/([0-9]+)$#', $uri, $m)){
+if (preg_match('#/stock_in\.php/([0-9]+)$#', $uri, $m)) {
     $id = $m[1];
 }
 
-$data = json_decode(file_get_contents("php://input"), true);
+// ✅ ดึง user_id จาก session
+$user_id = $_SESSION['user_id'] ?? 1;
 
-/* ---------------------------
-   GET - ดึงข้อมูลประวัติการนำเข้า
---------------------------- */
-if($method == "GET"){
-    if($id){
-        echo json_encode($stock->getById($id));
-    }else{
-        echo json_encode($stock->getAll());
-    }
+if ($method == "GET") {
+    echo json_encode($id ? $stock->getById($id) : $stock->getAll());
 }
 
-/* ---------------------------
-   POST - บันทึกการนำเข้าสินค้า (Create)
---------------------------- */
-if($method == "POST"){
+if ($method == "POST") {
     $result = $stock->create(
-        $data['prod_id'] ?? '',
+        $data['prod_id']  ?? '',
         $data['quantity'] ?? '',
-        $data['user_id'] ?? 1,
-        date("Y-m-d") // หรือส่งจาก $data['date']
+        $user_id
     );
-    echo json_encode(["success" => $result]);
+    echo json_encode($result);
 }
 
-/* ---------------------------
-   PUT - แก้ไขข้อมูลการนำเข้า (Update)
---------------------------- */
-if($method == "PUT" && $id){
+if ($method == "PUT" && $id) {
     $result = $stock->update(
         $id,
-        $data['prod_id'] ?? '',
+        $data['prod_id']  ?? '',
         $data['quantity'] ?? '',
-        $data['user_id'] ?? 1,
-        $data['date'] ?? ''
+        $user_id,
+        $data['date'] ?? date("Y-m-d")
     );
     echo json_encode(["success" => $result]);
 }
 
-/* ---------------------------
-   DELETE - ลบข้อมูลการนำเข้า
---------------------------- */
-if($method == "DELETE" && $id){
-    $result = $stock->delete($id);
-    echo json_encode(["success" => $result]);
+if ($method == "DELETE" && $id) {
+    echo json_encode(["success" => $stock->delete($id)]);
 }
-?>

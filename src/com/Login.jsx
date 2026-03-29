@@ -16,17 +16,16 @@ function Login() {
           email: email,
           password: password,
         },
+        { withCredentials: true }, // ✅ สำคัญมาก
       );
 
       const data = response.data;
 
       if (data.success) {
         console.log("Login สำเร็จ:", data.user);
-
-        // ตัวอย่าง: เก็บข้อมูลผู้ใช้ใน localStorage หรือ context
+        console.log("Session ID:", data.session_id); // ดู session id
         localStorage.setItem("user", JSON.stringify(data.user));
 
-        // redirect ไปหน้า dashboard
         if (data.user.role === "user") {
           navigate("/dashboard");
         } else if (data.user.role === "admin") {

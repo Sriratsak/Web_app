@@ -48,5 +48,14 @@ class Member {
 
         return false;
     }
+    // ดึงผู้ใช้จาก user_id
+public function getUserById($user_id){
+    $sql = "SELECT user_id, name, email, tel, role FROM user WHERE user_id = :user_id LIMIT 1";
+    $stmt = $this->conn->prepare($sql);
+    $stmt->bindParam(":user_id", $user_id);
+    $stmt->execute();
+
+    return $stmt->fetch(PDO::FETCH_ASSOC);
+}
 }
 ?>
