@@ -35,11 +35,30 @@ export default function Dashboard_admin() {
             <p className="text-gray-500">ภาพรวมข้อมูลคลังสินค้าและการเคลื่อนไหว</p>
           </div>
 
-          {/* Cards สรุปยอด */}
+          {/* Cards สรุปยอด - ปรับสีตามที่อ้วงสั่งเลยจ้า */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
             <StatCard title="รายการสินค้า" value={data.summary.total_items} unit="รายการ" icon="📦" color="blue" />
-            <StatCard title="มูลค่าคงคลัง" value={`฿${data.summary.total_value.toLocaleString()}`} unit="บาท" icon="📈" color="green" />
-            <StatCard title="สินค้าใกล้หมด" value={data.summary.low_stock_count} unit="รายการ" icon="⚠️" color="yellow" />
+            
+            {/* 🟢 มูลค่าคงคลัง -> ตัวเลขสีเขียว */}
+            <StatCard 
+              title="มูลค่าคงคลัง" 
+              value={`฿${data.summary.total_value.toLocaleString()}`} 
+              unit="บาท" 
+              icon="📈" 
+              color="green" 
+              valueColor="text-green-600" 
+            />
+            
+            {/* 🔴 สินค้าใกล้หมด -> ตัวเลขสีแดง และเปลี่ยนสีไอคอนเป็นแดง (เดิมเหลือง) */}
+            <StatCard 
+              title="สินค้าใกล้หมด" 
+              value={data.summary.low_stock_count} 
+              unit="รายการ" 
+              icon="⚠️" 
+              color="red" 
+              valueColor="text-red-600" 
+            />
+            
             <StatCard title="ธุรกรรมวันนี้" value={data.summary.daily_trans} unit="รายการ" icon="📋" color="purple" />
           </div>
 
@@ -108,17 +127,30 @@ export default function Dashboard_admin() {
   );
 }
 
-// --- Sub Components เพื่อความสะอาดของโค้ด ---
-const StatCard = ({ title, value, unit, icon, color }) => (
-  <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 flex justify-between items-center hover:scale-[1.02] transition-all">
-    <div>
-      <p className="text-gray-400 text-xs font-medium uppercase tracking-wider">{title}</p>
-      <h3 className="text-2xl font-black mt-1">{value}</h3>
-      <p className={`text-[10px] text-${color}-500 mt-1 font-bold`}>{unit}</p>
+// --- Sub Components ---
+// ปรับปรุง StatCard ให้รองรับ valueColor
+const StatCard = ({ title, value, unit, icon, color, valueColor }) => {
+  // สร้าง Mapping สำหรับสีพื้นหลังและสีข้อความ เพื่อให้ Tailwind ทำงานได้ชัวร์จ้า
+  const colorMap = {
+    blue: "bg-blue-50 text-blue-600",
+    green: "bg-green-50 text-green-600",
+    yellow: "bg-yellow-50 text-yellow-600",
+    red: "bg-red-50 text-red-600",
+    purple: "bg-purple-50 text-purple-600"
+  };
+
+  return (
+    <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 flex justify-between items-center hover:scale-[1.02] transition-all">
+      <div>
+        <p className="text-gray-400 text-xs font-medium uppercase tracking-wider">{title}</p>
+        {/* ใช้ valueColor ตรงนี้จ้าอ้วง */}
+        <h3 className={`text-2xl font-black mt-1 ${valueColor || "text-gray-900"}`}>{value}</h3>
+        <p className={`text-[10px] opacity-70 mt-1 font-bold ${valueColor || "text-gray-500"}`}>{unit}</p>
+      </div>
+      <div className={`${colorMap[color]} w-12 h-12 rounded-2xl flex items-center justify-center text-xl`}>{icon}</div>
     </div>
-    <div className={`bg-${color}-50 text-${color}-600 w-12 h-12 rounded-2xl flex items-center justify-center text-xl`}>{icon}</div>
-  </div>
-);
+  );
+};
 
 const ActivityItem = ({ item }) => (
   <div className="flex justify-between items-center border-b border-gray-50 pb-3 last:border-0">
@@ -141,7 +173,7 @@ const EmptyState = ({ text }) => <div className="flex items-center justify-cente
 
 const DashboardModal = ({ title, children, onClose }) => (
   <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
-    <div className="bg-white w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden animate-pop-in">
+    <div className="bg-white w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200">
       <div className="p-6 border-b flex justify-between items-center">
         <h3 className="font-bold text-lg">{title}</h3>
         <button onClick={onClose} className="text-gray-400 hover:text-black text-2xl">&times;</button>
