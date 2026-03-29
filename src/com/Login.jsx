@@ -26,10 +26,10 @@ function Login() {
         console.log("Session ID:", data.session_id); // ดู session id
         localStorage.setItem("user", JSON.stringify(data.user));
 
-        if (data.user.role === "user") {
-          navigate("/dashboard");
+        if (data.user.role === "user") {  
+          navigate("/withdraw");
         } else if (data.user.role === "admin") {
-          navigate("/admin");
+          navigate("/dashboard_admin");
         } else {
           alert("คุณไม่มีสิทธิ์เข้าระบบ");
         }

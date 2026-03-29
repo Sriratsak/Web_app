@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
-import Sidebar from "../components/Sidebar";
+import Sidebar from "../components/Sidebar_admin";
 import Navbar from "../components/Navbar";
 
-export default function Products() {
+export default function Products_admin() {
   const [open, setOpen] = useState(false);
 
   // ฟอร์มสินค้า

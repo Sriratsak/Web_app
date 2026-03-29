@@ -3,7 +3,25 @@ import { useState, useEffect } from "react";
 
 const menuItems = [
   {
-    to: "/withdraw",
+    to: "/dashboard_admin",
+    label: "แดชบอร์ด",
+    emoji: "📊",
+    particles: ["📈", "📉", "💹", "📊", "✨", "⚡", "💡", "🔥"],
+    activeFrom: "from-indigo-500",
+    activeTo: "to-indigo-400",
+    activeShadow: "shadow-indigo-200",
+  },
+  {
+    to: "/products_admin",
+    label: "จัดการสินค้า",
+    emoji: "📝",
+    particles: ["📦", "🏷️", "✏️", "📋", "💫", "⭐", "🌟", "✨"],
+    activeFrom: "from-violet-500",
+    activeTo: "to-violet-400",
+    activeShadow: "shadow-violet-200",
+  },
+  {
+    to: "/withdraw_admin",
     label: "รับสินค้าเข้าคลัง",
     emoji: "📤",
     particles: ["🚚", "📦", "⬆️", "💨", "✨", "🎯", "⚡", "💥"],
@@ -12,7 +30,7 @@ const menuItems = [
     activeShadow: "shadow-cyan-200",
   },
   {
-    to: "/receive",
+    to: "/receive_admin",
     label: "เบิกสินค้าออกจากคลัง",
     emoji: "📥",
     particles: ["🛒", "📦", "⬇️", "💨", "🌟", "🎁", "✨", "💫"],

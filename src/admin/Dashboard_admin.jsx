@@ -1,7 +1,7 @@
-import Sidebar from "../components/Sidebar";
+import Sidebar from "../components/Sidebar_admin";
 import Navbar from "../components/Navbar"; // ✅ 1. Import Navbar ที่เราแยกไว้มาใช้
 
-export default function Dashboard() {
+export default function Dashboard_admin() {
   return (
     <div className="flex min-h-screen bg-gray-100 font-sans text-gray-900">
       

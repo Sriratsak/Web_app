@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import Sidebar from "../components/Sidebar";
+import Sidebar from "../components/Sidebar_admin";
 import Navbar from "../components/Navbar";
 import axios from "axios";
 
@@ -8,7 +8,7 @@ const api = axios.create({
   withCredentials: true,
 });
 
-export default function Withdraw() {
+export default function Withdraw_admin(){
   const [products, setProducts]           = useState([]);
   const [search, setSearch]               = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");

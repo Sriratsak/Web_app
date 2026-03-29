@@ -136,10 +136,9 @@ export default function Navbar() {
 
         {/* Logo zone */}
         <div className="flex items-center gap-2">
-          <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white text-xs font-bold shadow">
-            S
-          </div>
-          <span className="text-sm font-semibold text-gray-700 tracking-wide">StoreMS</span>
+          {/* <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white text-xs font-bold shadow">
+           
+          </div> */}
         </div>
 
         {/* Right zone */}

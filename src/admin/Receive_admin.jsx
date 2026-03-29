@@ -1,8 +1,8 @@
 import { useState } from "react";
-import Sidebar from "../components/Sidebar";
+import Sidebar from "../components/Sidebar_admin";
 import Navbar from "../components/Navbar"; // ✅ 1. Import Navbar เข้ามา
 
-export default function Receive() {
+export default function Receive_admin()  {
   // 1. ข้อมูลสินค้า (Mockup)
   const [products, setProducts] = useState([
     { id: 1, name: "ข้าวสาร", stock: 50, category: "อาหาร", popular: true },
