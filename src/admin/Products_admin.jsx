@@ -9,8 +9,8 @@ export default function Products_admin() {
   // ฟอร์มสินค้า
   const [form, setForm] = useState({
     prod_name: "",
-    prod_price: 0,
-    prod_capacity: 0,
+    prod_price: "",
+    prod_capacity: "",
     cat_id: "",
   });
 
@@ -73,7 +73,7 @@ export default function Products_admin() {
       });
 
       // รีเซ็ตฟอร์มและโหลดข้อมูลใหม่
-      setForm({ prod_name: "", prod_price: 0, prod_capacity: 0, cat_id: "" });
+      setForm({ prod_name: "", prod_price: "", prod_capacity: "", cat_id: "" });
       setNewCategory("");
       setOpen(false);
       fetchProducts();
@@ -130,6 +130,9 @@ export default function Products_admin() {
       console.error("Error updating product:", err);
     }
   };
+  const handleNumberInput = (value) => {
+    return value.replace(/[^0-9]/g, "");
+  };
   return (
     <div className="flex min-h-screen bg-gray-100">
       <Sidebar />
@@ -179,12 +182,12 @@ export default function Products_admin() {
                     <div className="mb-4">
                       <label className="block text-sm mb-1">จำนวน</label>
                       <input
-                        type="number"
+                        type="text"
                         value={editProduct.prod_capacity}
                         onChange={(e) =>
                           setEditProduct({
                             ...editProduct,
-                            prod_capacity: Number(e.target.value),
+                            prod_capacity: handleNumberInput(e.target.value),
                           })
                         }
                         className="w-full bg-gray-100 border rounded-lg px-4 py-2"
@@ -215,12 +218,12 @@ export default function Products_admin() {
                     <div className="mb-4">
                       <label className="block text-sm mb-1">ราคา</label>
                       <input
-                        type="number"
+                        type="text"
                         value={editProduct.prod_price}
                         onChange={(e) =>
                           setEditProduct({
                             ...editProduct,
-                            prod_price: Number(e.target.value),
+                            prod_price: handleNumberInput(e.target.value),
                           })
                         }
                         className="w-full bg-gray-100 border rounded-lg px-4 py-2"
@@ -270,16 +273,16 @@ export default function Products_admin() {
               <table className="w-full border-collapse shadow-lg rounded-xl overflow-hidden">
                 <thead className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white">
                   <tr>
-                    <th className="px-6 py-3 text-left uppercase tracking-wider">
+                    <th className="px-6 py-3 text-center uppercase tracking-wider" >
                       ชื่อสินค้า
                     </th>
-                    <th className="px-6 py-3 text-right uppercase tracking-wider">
+                    <th className="px-6 py-3 text-center uppercase tracking-wider">
                       ราคา
                     </th>
-                    <th className="px-6 py-3 text-right uppercase tracking-wider">
+                    <th className="px-6 py-3 text-center uppercase tracking-wider">
                       จำนวน
                     </th>
-                    <th className="px-6 py-3 text-left uppercase tracking-wider">
+                    <th className="px-6 py-3 text-center uppercase tracking-wider">
                       หมวดหมู่
                     </th>
                     <th className="px-6 py-3 text-center uppercase tracking-wider">
@@ -293,16 +296,16 @@ export default function Products_admin() {
                       key={idx}
                       className="hover:bg-gray-100 transition-colors duration-200"
                     >
-                      <td className="px-6 py-4 text-gray-800 font-medium">
+                      <td className="px-6 py-4 text-center text-gray-800 font-medium">
                         {p.prod_name}
                       </td>
-                      <td className="px-6 py-4 text-right text-green-600 font-semibold">
+                      <td className="px-6 py-4 text-center text-green-600 font-semibold">
                         {p.prod_price.toLocaleString()}
                       </td>
-                      <td className="px-6 py-4 text-right text-gray-700">
+                      <td className="px-6 py-4 text-center text-gray-700">
                         {p.prod_capacity}
                       </td>
-                      <td className="px-6 py-4 text-gray-600">{p.cat_name}</td>
+                      <td className="px-6 py-4  text-center text-gray-600">{p.cat_name}</td>
                       <td className="px-6 py-4 text-center">
                         <button
                           onClick={() => setEditProduct({ ...p })} // กำหนดสินค้าเพื่อแก้ไข
@@ -330,7 +333,7 @@ export default function Products_admin() {
                   value={newCategory}
                   onChange={(e) => setNewCategory(e.target.value)}
                   className="w-full bg-gray-100 border rounded-lg px-4 py-2"
-                  placeholder="กรอกชื่อหมวดหมู่ใหม่"
+                  placeholder="กรุณากรอกชื่อหมวดหมู่"
                 />
               </div>
 
@@ -374,6 +377,7 @@ export default function Products_admin() {
                     setForm({ ...form, prod_name: e.target.value })
                   }
                   className="w-full bg-gray-100 border rounded-lg px-4 py-2"
+                  placeholder="กรุณากรอกชื่อสินค้า"
                 />
               </div>
               <div className="mb-4">
@@ -395,24 +399,34 @@ export default function Products_admin() {
               <div className="mb-4">
                 <label className="block text-sm mb-1">ราคา</label>
                 <input
-                  type="number"
+                  type="text"
                   value={form.prod_price}
                   onChange={(e) =>
-                    setForm({ ...form, prod_price: Number(e.target.value) })
+                    setForm({
+                      ...form,
+                      prod_price: handleNumberInput(e.target.value),
+                    })
                   }
+                  inputMode="numeric"
                   className="w-full bg-gray-100 border rounded-lg px-4 py-2"
+                  placeholder="กรุณากรอกราคา"
                 />
               </div>
 
               <div className="mb-4">
                 <label className="block text-sm mb-1">จำนวน</label>
                 <input
-                  type="number"
+                  type="text"
                   value={form.prod_capacity}
                   onChange={(e) =>
-                    setForm({ ...form, prod_capacity: Number(e.target.value) })
+                    setForm({
+                      ...form,
+                      prod_capacity: handleNumberInput(e.target.value),
+                    })
                   }
+                  inputMode="numeric"
                   className="w-full bg-gray-100 border rounded-lg px-4 py-2"
+                  placeholder="กรุณากรอกจำนวน"
                 />
               </div>
               <div className="flex gap-2 mt-6">

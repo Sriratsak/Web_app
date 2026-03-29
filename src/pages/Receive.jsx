@@ -1,4 +1,3 @@
-//เบิก
 import { useState, useEffect } from "react";
 import axios from "axios";
 import Sidebar from "../components/Sidebar";
@@ -8,7 +7,6 @@ export default function Receive() {
   const [products, setProducts] = useState([]);
   const [search, setSearch] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
-  const [showPopular, setShowPopular] = useState(false);
   const [selectedItems, setSelectedItems] = useState([]);
   const [note, setNote] = useState("");
   const [history, setHistory] = useState([]);
@@ -23,7 +21,6 @@ export default function Receive() {
     fetchHistory();
   }, []);
 
-  // 🔥 โหลดสินค้า
   const fetchProducts = async () => {
     try {
       const res = await axios.get("http://localhost/Web_app/backend/api/product.php", { withCredentials: true });
@@ -33,7 +30,6 @@ export default function Receive() {
         name: item.prod_name,
         stock: Math.max(0, Number(item.prod_quantity) || Number(item.quantity) || 0),
         category: item.cat_name || "ทั่วไป",
-        popular: false,
       }));
       setProducts(formatted);
     } catch (err) {
@@ -41,7 +37,6 @@ export default function Receive() {
     }
   };
 
-  // 🔥 โหลด history
   const fetchHistory = async () => {
     try {
       const res = await axios.get("http://localhost/Web_app/backend/api/stock_out.php", { withCredentials: true });
@@ -62,8 +57,7 @@ export default function Receive() {
   const filteredProducts = products.filter((p) => {
     const matchSearch = (p.name || "").toLowerCase().includes(search.toLowerCase());
     const matchCategory = selectedCategory === "all" || p.category === selectedCategory;
-    const matchPopular = showPopular ? p.popular : true;
-    return matchSearch && matchCategory && matchPopular;
+    return matchSearch && matchCategory;
   });
 
   const toggleProduct = (product) => {
@@ -71,27 +65,29 @@ export default function Receive() {
     if (exists) {
       setSelectedItems(selectedItems.filter((i) => i.id !== product.id));
     } else {
-      setSelectedItems([...selectedItems, { ...product, qty: 1 }]);
+      setSelectedItems([...selectedItems, { ...product, qty: "1" }]);
     }
   };
 
-  const updateQty = (id, qty) => {
-    setSelectedItems((prev) =>
-      prev.map((item) => (item.id === id ? { ...item, qty: Number(qty) } : item))
-    );
+  const updateQty = (id, value) => {
+    if (value === "" || /^[0-9]+$/.test(value)) {
+      setSelectedItems((prev) =>
+        prev.map((item) => (item.id === id ? { ...item, qty: value } : item))
+      );
+    }
   };
 
   const handlePreSubmit = () => {
     if (selectedItems.length === 0) return alert("อ้วงลืมเลือกของ 😡");
     for (let item of selectedItems) {
       const p = products.find((prod) => prod.id === item.id);
-      if (!item.qty || item.qty <= 0) return alert(`ใส่จำนวนของ ${item.name}`);
-      if (item.qty > p.stock) return alert(`ของ ${item.name} เหลือแค่ ${p.stock}`);
+      const numQty = Number(item.qty);
+      if (!item.qty || numQty <= 0) return alert(`ใส่จำนวนของ ${item.name}`);
+      if (numQty > p.stock) return alert(`ของ ${item.name} เหลือแค่ ${p.stock}`);
     }
     setIsModalOpen(true);
   };
 
-  // 🚀 บันทึกข้อมูลจริงลง Database
   const confirmSubmit = async () => {
     setLoading(true);
     try {
@@ -100,18 +96,16 @@ export default function Receive() {
           prod_id: item.id,
           quantity: Number(item.qty),
           note,
-          user_id: 1, // ปรับตามระบบ login ของอ้วงนะ
+          user_id: 1, 
         }, { withCredentials: true })
       );
-
       await Promise.all(requests);
       alert("บันทึกการเบิกสำเร็จแล้วจ้า! ✨");
-      
       setSelectedItems([]);
       setNote("");
       setIsModalOpen(false);
-      await fetchProducts(); // อัปเดตเลขสต็อกล่าสุด
-      await fetchHistory();  // อัปเดตประวัติล่าสุด
+      await fetchProducts();
+      await fetchHistory();
     } catch (err) {
       console.error(err);
       alert("บันทึกไม่สำเร็จ ลองเช็ค API ดูนะอ้วง");
@@ -130,12 +124,11 @@ export default function Receive() {
         <main className="p-8 overflow-y-auto">
           <header className="mb-6">
             <h2 className="text-2xl font-bold mb-1">📤 บันทึกการเบิกสินค้า</h2>
-            <p className="text-gray-500">บันทึกรายการนำสินค้าออกจากคลังและตัดยอดสต็อก</p>
+            <p className="text-gray-500 font-kanit">บันทึกรายการนำสินค้าออกจากคลังและตัดยอดสต็อก</p>
           </header>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
-            {/* LEFT: ฟอร์มเลือกสินค้า */}
-            <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-200">
+            <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-200 font-kanit">
               <div className="space-y-4 mb-6">
                 <input
                   type="text"
@@ -148,18 +141,12 @@ export default function Receive() {
                   <select
                     value={selectedCategory}
                     onChange={(e) => setSelectedCategory(e.target.value)}
-                    className="border-0 bg-gray-50 px-4 py-2 rounded-2xl text-sm focus:ring-2 focus:ring-red-500 outline-none cursor-pointer"
+                    className="w-full border-0 bg-gray-50 px-4 py-2 rounded-2xl text-sm focus:ring-2 focus:ring-red-500 outline-none cursor-pointer"
                   >
                     {categories.map((cat) => (
                       <option key={cat} value={cat}>{cat === "all" ? "ทุกหมวดหมู่" : cat}</option>
                     ))}
                   </select>
-                  <button
-                    onClick={() => setShowPopular(!showPopular)}
-                    className={`px-5 py-2 rounded-2xl text-sm font-medium border transition-all ${showPopular ? "bg-red-600 text-white border-red-600" : "bg-white text-gray-500 border-gray-200"}`}
-                  >
-                    ⭐ ใช้บ่อย
-                  </button>
                 </div>
               </div>
 
@@ -178,16 +165,17 @@ export default function Receive() {
                           <p className={`text-xs ${isOutOfStock ? "text-red-500 font-bold" : "text-gray-400"}`}>{isOutOfStock ? "สินค้าหมด" : `คงเหลือ ${item.stock} หน่วย`}</p>
                         </div>
                       </div>
+                      
                       {selected && (
-                        <div className="flex items-center gap-2">
-                          <span className="text-xs text-gray-400 font-medium">เบิก:</span>
+                        <div className="flex items-center gap-2 bg-gray-100 p-1 rounded-2xl border border-gray-100">
+                          <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wider pl-2">จำนวน:</span>
                           <input
-                            type="number"
-                            min="1"
-                            max={item.stock}
+                            type="text"
+                            inputMode="numeric"
                             value={selected.qty}
+                            placeholder="0"
                             onChange={(e) => updateQty(item.id, e.target.value)}
-                            className="w-16 bg-gray-100 border-0 px-2 py-1.5 rounded-xl text-center font-bold focus:ring-1 focus:ring-red-500 outline-none"
+                            className="w-14 bg-white border-0 py-1.5 rounded-xl text-center font-black text-red-600 focus:ring-0 outline-none shadow-sm"
                           />
                         </div>
                       )}
@@ -210,22 +198,21 @@ export default function Receive() {
               </button>
             </div>
 
-            {/* RIGHT: ประวัติ */}
-            <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-200 flex flex-col h-[650px]">
+            <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-200 flex flex-col h-[650px] font-kanit">
               <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-3 flex-none">
                 <h3 className="font-bold text-lg flex items-center gap-2">📜 ประวัติการเบิก</h3>
-                <input type="date" value={filterDate} onChange={(e) => setFilterDate(e.target.value)} className="border-0 bg-gray-100 px-4 py-2 rounded-xl text-sm focus:ring-2 focus:ring-black outline-none" />
+                <input type="date" value={filterDate} onChange={(e) => setFilterDate(e.target.value)} className="border-0 bg-gray-100 px-4 py-2 rounded-xl text-sm outline-none" />
               </div>
 
-              <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar space-y-3">
+              <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar space-y-3 font-kanit">
                 {filteredHistory.length === 0 ? (
                   <div className="text-center py-24 text-gray-300">
                     <p className="text-5xl mb-4">📅</p>
-                    <p className="text-sm">ไม่มีประวัติการเบิกในวันที่เลือก</p>
+                    <p className="text-sm font-medium">ไม่มีประวัติการเบิกในวันที่เลือก</p>
                   </div>
                 ) : (
                   filteredHistory.map((item, i) => (
-                    <div key={i} className="bg-gray-50 p-4 rounded-2xl flex justify-between items-center border border-gray-50 hover:border-red-200 transition-all">
+                    <div key={i} className="bg-gray-50 p-4 rounded-2xl flex justify-between items-center border border-gray-50 hover:border-red-200 transition-all group shadow-sm">
                       <div>
                         <p className="font-bold text-gray-800">{item.name}</p>
                         <p className="text-[10px] text-gray-400 font-medium uppercase tracking-widest mt-0.5">🕙 เวลา {item.displayTime} น.</p>
@@ -241,17 +228,16 @@ export default function Receive() {
         </main>
       </div>
 
-      {/* ✅ นี่คือส่วนที่เพิ่มให้จ้า: MODAL ยืนยันรายการ */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-md">
-          <div className="bg-white w-full max-w-md rounded-[2.5rem] shadow-2xl p-8 text-center animate-pop-in">
+          <div className="bg-white w-full max-w-md rounded-[2.5rem] shadow-2xl p-8 text-center animate-pop-in font-kanit">
             <div className="w-20 h-20 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto mb-6 text-3xl">⚠️</div>
             <h3 className="text-2xl font-black mb-2 text-gray-800">ยืนยันการเบิกออก?</h3>
             <p className="text-gray-400 text-sm mb-6">กรุณาตรวจสอบรายการก่อนตัดยอดสต็อก</p>
             <div className="bg-gray-50 rounded-3xl p-5 mb-8 max-h-52 overflow-y-auto border text-left text-sm">
               {selectedItems.map((item) => (
                 <div key={item.id} className="flex justify-between py-2 border-b border-dashed last:border-0">
-                  <span className="text-gray-600">{item.name}</span>
+                  <span className="text-gray-600 font-medium">{item.name}</span>
                   <span className="font-bold text-red-600">-{item.qty} ชิ้น</span>
                 </div>
               ))}
@@ -266,7 +252,14 @@ export default function Receive() {
         </div>
       )}
 
-      <style dangerouslySetInnerHTML={{ __html: `.custom-scrollbar::-webkit-scrollbar { width: 5px; } .custom-scrollbar::-webkit-scrollbar-thumb { background: #E5E7EB; border-radius: 10px; } @keyframes pop-in { 0% { transform: scale(0.95); opacity: 0; } 100% { transform: scale(1); opacity: 1; } } .animate-pop-in { animation: pop-in 0.3s cubic-bezier(0.16, 1, 0.3, 1); }` }} />
+      <style dangerouslySetInnerHTML={{ __html: `
+        @import url('https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;700;800&display=swap');
+        .font-kanit { font-family: 'Kanit', sans-serif; }
+        .custom-scrollbar::-webkit-scrollbar { width: 5px; } 
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #E5E7EB; border-radius: 10px; } 
+        @keyframes pop-in { 0% { transform: scale(0.95); opacity: 0; } 100% { transform: scale(1); opacity: 1; } } 
+        .animate-pop-in { animation: pop-in 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
+      ` }} />
     </div>
   );
 }

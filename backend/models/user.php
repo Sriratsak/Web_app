@@ -42,24 +42,22 @@ if ($method === "GET") {
     exit;
 }
 
-// =======================
-// PUT: แก้ไข user
-// =======================
+// ส่วน PUT ใน user.php
 if ($method === "PUT") {
     $input = json_decode(file_get_contents("php://input"), true);
     $id = $input['id'] ?? null;
     $username = $input['username'] ?? null;
-    $role = $input['role'] ?? null;
-
-    if (!$id || !$username || !$role) {
-        echo json_encode(["success" => false, "message" => "Missing parameters"]);
-        exit;
-    }
+    $email = $input['email'] ?? null;
+    $tel = $input['tel'] ?? null;
+    $status = $input['status'] ?? null; // รับค่า status เพิ่ม
 
     try {
-        $stmt = $conn->prepare("UPDATE user SET name=:username, role=:role WHERE user_id=:id");
+        // เพิ่ม status=:status ใน SQL
+        $stmt = $conn->prepare("UPDATE user SET name=:username, email=:email, tel=:tel, status=:status WHERE user_id=:id");
         $stmt->bindParam(':username', $username);
-        $stmt->bindParam(':role', $role);
+        $stmt->bindParam(':email', $email);
+        $stmt->bindParam(':tel', $tel);
+        $stmt->bindParam(':status', $status);
         $stmt->bindParam(':id', $id, PDO::PARAM_INT);
 
         if ($stmt->execute()) {
