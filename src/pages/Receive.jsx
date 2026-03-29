@@ -115,7 +115,7 @@ export default function Withdraw() {
         }, { withCredentials: true })
       );
       await Promise.all(requests);
-      alert("บันทึกการเบิกสำเร็จแล้วจ้า! ✨");
+      alert("บันทึกการเบิกสำเร็จ");
       setSelectedItems([]);
       setNote("");
       setIsModalOpen(false);
@@ -123,7 +123,7 @@ export default function Withdraw() {
       await fetchHistory();
     } catch (err) {
       console.error(err);
-      alert("บันทึกไม่สำเร็จ ลองเช็ค API ดูนะอ้วง");
+      alert("บันทึกไม่สำเร็จ ลองเช็ค API ");
     } finally {
       setLoading(false);
     }

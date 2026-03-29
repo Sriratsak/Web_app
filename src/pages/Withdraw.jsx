@@ -104,7 +104,7 @@ export default function Receive() {
           note: note
         });
       }
-      alert("บันทึกรับเข้าสำเร็จแล้วจ้า! ✨");
+      alert("บันทึกรับเข้าสำเร็จ");
       await fetchHistory();
       await fetchProducts();
       setSelectedItems([]);
