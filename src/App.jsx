@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 // 🔥 Admin pages
 import Dashboard_admin from "./admin/Dashboard_admin";
 import Products_admin from "./admin/Products_admin";
+import StockReport_admin from "./admin/StockReport_admin";
 import Withdraw_admin from "./admin/Withdraw_admin";
 import Receive_admin from "./admin/Receive_admin";
 import Users_admin from "./admin/Users_admin"; 
@@ -31,6 +32,7 @@ function App() {
         <Route path="/withdraw_admin" element={<Withdraw_admin />} />
         <Route path="/receive_admin" element={<Receive_admin />} />
         <Route path="/users_admin" element={<Users_admin />} /> 
+        <Route path="/StockReport_admin" element={<StockReport_admin />} /> 
 
         {/* 👤 User */}
         <Route path="/withdraw" element={<Withdraw />} />
