@@ -1,6 +1,7 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import axios from "axios";
+
 function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -8,25 +9,26 @@ function Login() {
 
   const check_login = async (e) => {
     e.preventDefault();
+    console.log("Login attempt:", { email, password });
 
     try {
       const response = await axios.post(
         "http://localhost/Web_app/backend/api/member.php/login",
-        {
-          email: email,
-          password: password,
-        },
-        { withCredentials: true }, // ✅ สำคัญมาก
+        { email, password },
+        { withCredentials: true }
       );
 
+      console.log("Raw response:", response);
       const data = response.data;
+      console.log("Response data:", data);
 
       if (data.success) {
         console.log("Login สำเร็จ:", data.user);
-        console.log("Session ID:", data.session_id); // ดู session id
+        console.log("Session ID:", data.session_id);
+
         localStorage.setItem("user", JSON.stringify(data.user));
 
-        if (data.user.role === "user") {  
+        if (data.user.role === "user") {
           navigate("/withdraw");
         } else if (data.user.role === "admin") {
           navigate("/dashboard_admin");
@@ -38,9 +40,13 @@ function Login() {
       }
     } catch (error) {
       console.error("เกิดข้อผิดพลาด:", error);
+      if (error.response) {
+        console.error("Server response:", error.response.data);
+      }
       alert("เกิดข้อผิดพลาดในการเชื่อมต่อ server");
     }
   };
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-100 to-indigo-100 px-4">
       <div className="bg-white w-full max-w-sm p-6 rounded-2xl shadow-lg animate-fadeIn">
@@ -86,7 +92,6 @@ function Login() {
           </button>
         </form>
 
-        {/* Link */}
         <p className="text-center mt-4 text-sm">
           ยังไม่มีบัญชี?
           <Link

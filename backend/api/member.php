@@ -1,5 +1,9 @@
 <?php
-ini_set('session.cookie_samesite', 'None');
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+
+ini_set('session.cookie_samesite', 'Lax'); // สำหรับ localhost
 ini_set('session.cookie_secure', '0');
 ini_set('session.cookie_httponly', '1');
 session_start();
@@ -21,8 +25,13 @@ $method = $_SERVER['REQUEST_METHOD'];
 $uri    = $_SERVER['REQUEST_URI'];
 $data   = json_decode(file_get_contents("php://input"), true) ?? [];
 
+// Debug ดิบ
+error_log("REQUEST URI: $uri");
+error_log("REQUEST METHOD: $method");
+error_log("POST DATA: " . json_encode($data));
+
 // REGISTER
-if ($method == "POST" && preg_match('#/member.php/register$#', $uri)) {
+if ($method == "POST" && strpos($uri, '/member.php/register') !== false) {
     $result = $member->register(
         $data['password'] ?? '',
         $data['name']     ?? '',
@@ -36,15 +45,15 @@ if ($method == "POST" && preg_match('#/member.php/register$#', $uri)) {
 
 // LOGIN
 if ($method == "POST" && preg_match('#/member.php/login$#', $uri)) {
-    $user = $member->login($data['password'] ?? '', $data['email'] ?? '');
+    $loginResult = $member->login($data['password'] ?? '', $data['email'] ?? '');
+    
+    if ($loginResult['success']) {
+        $user = $loginResult['user']; // user จริง
+        unset($user['password']); // ลบ password ออกจาก array
 
-    if ($user) {
-        unset($user['password']);
         $_SESSION['user_id']    = $user['user_id'];
         $_SESSION['user_name']  = $user['name'];
         $_SESSION['user_email'] = $user['email'];
-
-        error_log("[LOGIN] success → user_id: {$user['user_id']}, session_id: " . session_id());
 
         echo json_encode([
             "success"    => true,
@@ -52,9 +61,8 @@ if ($method == "POST" && preg_match('#/member.php/login$#', $uri)) {
             "session_id" => session_id()
         ]);
     } else {
-        error_log("[LOGIN] failed → email: " . ($data['email'] ?? 'ไม่มี'));
         http_response_code(401);
-        echo json_encode(["success" => false, "message" => "อีเมลหรือรหัสผ่านไม่ถูกต้อง"]);
+        echo json_encode($loginResult); // ส่ง message จาก login() ไปตรง ๆ
     }
     exit;
 }
