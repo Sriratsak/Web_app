@@ -23,7 +23,7 @@ $method = $_SERVER['REQUEST_METHOD'];
 $uri = $_SERVER['REQUEST_URI'];
 
 // Match ID จาก Path
-$id = null;
+$id = $_GET['id'] ?? null;
 if(preg_match('#/product.php/([0-9]+)$#', $uri, $m)){
     $id = $m[1];
 }
@@ -71,7 +71,14 @@ if($method === "PUT" && $id){
     $cat_id = $data['cat_id'] ?? null;
 
     $result = $product->update($id, $prod_name, $prod_price, $prod_capacity, $cat_id);
-    echo json_encode(["success" => $result]);
+
+    if($result){
+        // ดึงสินค้าที่อัปเดตแล้ว พร้อม cat_name
+        $updatedProduct = $product->getById($id);
+        echo json_encode(["success" => true, "product" => $updatedProduct]);
+    } else {
+        echo json_encode(["success" => false, "message" => "แก้ไขสินค้าไม่สำเร็จ"]);
+    }
 }
 
 // ------------------ DELETE ------------------

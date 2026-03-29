@@ -20,6 +20,7 @@ export default function Products_admin() {
   // ข้อมูลสินค้าและหมวดหมู่
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
+  const [editProduct, setEditProduct] = useState(null); // สินค้าที่กำลังแก้ไข
 
   // โหลดข้อมูลเมื่อหน้าเปิด
   useEffect(() => {
@@ -66,8 +67,8 @@ export default function Products_admin() {
       // เพิ่มสินค้า
       await axios.post("http://localhost/Web_app/backend/api/product.php", {
         prod_name: form.prod_name,
-        prod_price: form.prod_price,
-        prod_capacity: form.prod_capacity,
+        prod_price: Number(form.prod_price),
+        prod_capacity: Number(form.prod_capacity),
         cat_id: cat_id_to_use,
       });
 
@@ -103,6 +104,32 @@ export default function Products_admin() {
       console.error("Error adding category:", err);
     }
   };
+  const handleUpdateProduct = async () => {
+    try {
+      const res = await axios.put(
+        `http://localhost/Web_app/backend/api/product.php?id=${editProduct.prod_id}`,
+        {
+          prod_name: editProduct.prod_name,
+          prod_price: Number(editProduct.prod_price),
+          prod_capacity: Number(editProduct.prod_capacity),
+          cat_id: editProduct.cat_id,
+        },
+      );
+
+      // อัปเดตรายการใน state ทันที
+      setProducts(
+        products.map((p) =>
+          p.prod_id === editProduct.prod_id
+            ? res.data.product // ใช้ข้อมูลล่าสุดจาก backend
+            : p,
+        ),
+      );
+
+      setEditProduct(null); // ปิด modal
+    } catch (err) {
+      console.error("Error updating product:", err);
+    }
+  };
   return (
     <div className="flex min-h-screen bg-gray-100">
       <Sidebar />
@@ -131,6 +158,99 @@ export default function Products_admin() {
               >
                 + เพิ่มสินค้าใหม่
               </button>
+              {editProduct && (
+                <div className="fixed inset-0 bg-black/30 flex justify-center items-center z-50">
+                  <div className="bg-white w-full max-w-md p-6 rounded-2xl shadow-lg">
+                    <h2 className="text-lg font-semibold mb-6">แก้ไขสินค้า</h2>
+                    <div className="mb-4">
+                      <label className="block text-sm mb-1">ชื่อสินค้า</label>
+                      <input
+                        type="text"
+                        value={editProduct.prod_name}
+                        onChange={(e) =>
+                          setEditProduct({
+                            ...editProduct,
+                            prod_name: e.target.value,
+                          })
+                        }
+                        className="w-full bg-gray-100 border rounded-lg px-4 py-2"
+                      />
+                    </div>
+                    <div className="mb-4">
+                      <label className="block text-sm mb-1">รายละเอียด</label>
+                      <input
+                        type="number"
+                        value={editProduct.prod_capacity}
+                        onChange={(e) =>
+                          setEditProduct({
+                            ...editProduct,
+                            prod_capacity: Number(e.target.value),
+                          })
+                        }
+                        className="w-full bg-gray-100 border rounded-lg px-4 py-2"
+                      />
+                    </div>
+                    <div className="mb-4">
+                      <label className="block text-sm mb-1">หมวดหมู่</label>
+                      <select
+                        value={editProduct.cat_id}
+                        onChange={(e) =>
+                          setEditProduct({
+                            ...editProduct,
+                            cat_id: e.target.value
+                              ? Number(e.target.value)
+                              : null,
+                          })
+                        }
+                        className="w-full bg-gray-100 border rounded-lg px-4 py-2"
+                      >
+                        <option value="">-- เลือกหมวดหมู่ --</option>
+                        {categories.map((c) => (
+                          <option key={c.cat_id} value={c.cat_id}>
+                            {c.cat_name}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    <div className="mb-4">
+                      <label className="block text-sm mb-1">ราคา</label>
+                      <input
+                        type="number"
+                        value={editProduct.prod_price}
+                        onChange={(e) =>
+                          setEditProduct({
+                            ...editProduct,
+                            prod_price: Number(e.target.value),
+                          })
+                        }
+                        className="w-full bg-gray-100 border rounded-lg px-4 py-2"
+                      />
+                    </div>
+                    <div className="flex gap-2 mt-6">
+                      <button
+                        onClick={() => setEditProduct(null)}
+                        className="w-1/2 bg-gray-200 py-2 rounded-lg"
+                      >
+                        ยกเลิก
+                      </button>
+                      <button
+                        onClick={() => {
+                          if (
+                            window.confirm(
+                              `คุณต้องการบันทึกการแก้ไขสินค้า "${editProduct.prod_name}" หรือไม่?`,
+                            )
+                          ) {
+                            handleUpdateProduct();
+                          }
+                        }}
+                        className="w-1/2 bg-blue-600 text-white py-2 rounded-lg"
+                      >
+                        บันทึก
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 
@@ -157,10 +277,13 @@ export default function Products_admin() {
                       ราคา
                     </th>
                     <th className="px-6 py-3 text-right uppercase tracking-wider">
-                      จำนวน
+                      รายละเอียด
                     </th>
                     <th className="px-6 py-3 text-left uppercase tracking-wider">
                       หมวดหมู่
+                    </th>
+                    <th className="px-6 py-3 text-center uppercase tracking-wider">
+                      แก้ไข
                     </th>
                   </tr>
                 </thead>
@@ -180,6 +303,14 @@ export default function Products_admin() {
                         {p.prod_capacity}
                       </td>
                       <td className="px-6 py-4 text-gray-600">{p.cat_name}</td>
+                      <td className="px-6 py-4 text-center">
+                        <button
+                          onClick={() => setEditProduct({ ...p })} // กำหนดสินค้าเพื่อแก้ไข
+                          className="bg-yellow-400 text-white px-3 py-1 rounded-lg text-sm hover:bg-yellow-500"
+                        >
+                          แก้ไข
+                        </button>
+                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -267,19 +398,19 @@ export default function Products_admin() {
                   type="number"
                   value={form.prod_price}
                   onChange={(e) =>
-                    setForm({ ...form, prod_price: e.target.value })
+                    setForm({ ...form, prod_price: Number(e.target.value) })
                   }
                   className="w-full bg-gray-100 border rounded-lg px-4 py-2"
                 />
               </div>
 
               <div className="mb-4">
-                <label className="block text-sm mb-1">จำนวน</label>
+                <label className="block text-sm mb-1">รายละเอียด</label>
                 <input
                   type="number"
                   value={form.prod_capacity}
                   onChange={(e) =>
-                    setForm({ ...form, prod_capacity: e.target.value })
+                    setForm({ ...form, prod_capacity: Number(e.target.value) })
                   }
                   className="w-full bg-gray-100 border rounded-lg px-4 py-2"
                 />
