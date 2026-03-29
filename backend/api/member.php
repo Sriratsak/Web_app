@@ -1,15 +1,25 @@
 <?php
 ini_set('session.cookie_samesite', 'None');
-ini_set('session.cookie_secure', '1'); // ต้องเป็น 1
+ini_set('session.cookie_secure', '1'); 
 ini_set('session.cookie_httponly', '1');
-session_start();
 
-header("Content-Type: application/json");
-header("Access-Control-Allow-Headers: Content-Type");
-header("Access-Control-Allow-Methods: POST, OPTIONS");
+// 1. เพิ่มบรรทัดนี้: อนุญาต Origin จากฝั่ง React/Vite ของอ้วง
+header("Access-Control-Allow-Origin: http://localhost:5173"); 
+
+// 2. ตั้งค่าให้ยอมรับ Credentials (Cookies/Session)
 header("Access-Control-Allow-Credentials: true");
 
-if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') { http_response_code(200); exit; }
+header("Content-Type: application/json");
+header("Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With");
+header("Access-Control-Allow-Methods: POST, OPTIONS");
+
+// 3. จัดการ OPTIONS Request (Preflight) ให้จบตั้งแต่อต้นทาง
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') { 
+    http_response_code(200); 
+    exit; 
+}
+
+session_start();
 
 require_once "../Database.php";
 require_once "../models/Member.php";
