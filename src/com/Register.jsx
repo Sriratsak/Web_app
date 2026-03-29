@@ -1,14 +1,14 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import axios from "axios";
 
 function Register() {
+  const navigate = useNavigate();
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [check_password, setCheck_Password] = useState("");
   const [tel, setTel] = useState("");
-
   const register = async (e) => {
     e.preventDefault();
 
@@ -32,6 +32,7 @@ function Register() {
 
       if (reg.data.success) {
         alert("สมัครสมาชิกสำเร็จ");
+        navigate("/login");
         setUsername("");
         setEmail("");
         setTel("");
