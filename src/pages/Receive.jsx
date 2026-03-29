@@ -3,7 +3,12 @@ import axios from "axios";
 import Sidebar from "../components/Sidebar";
 import Navbar from "../components/Navbar";
 
-export default function Receive() {
+// 🕒 1. ย้ายฟังก์ชันมาไว้นอก Component เพื่อให้เรียกใช้ได้ทันทีตอนเริ่มโหลด
+const getThaiToday = () => {
+  return new Date().toLocaleDateString('sv-SE'); // คืนค่า YYYY-MM-DD ตามเวลาเครื่อง
+};
+
+export default function Withdraw() {
   const [products, setProducts] = useState([]);
   const [search, setSearch] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
@@ -12,15 +17,21 @@ export default function Receive() {
   const [history, setHistory] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [filterDate, setFilterDate] = useState(new Date().toISOString().split("T")[0]);
+
+  // ✅ 2. เซตค่าเริ่มต้นตรงๆ ด้วยฟังก์ชันเลย (หน้าจอจะโชว์วันที่ปัจจุบันทันที 100%)
+  const [filterDate, setFilterDate] = useState(getThaiToday());
 
   const categories = ["all", ...new Set(products.map((p) => p.category))];
 
   useEffect(() => {
+    // 🕒 3. บังคับอัปเดตวันที่อีกรอบเพื่อความชัวร์ (เผื่อเปิดค้างไว้ข้ามคืน)
+    setFilterDate(getThaiToday()); 
+    
     fetchProducts();
     fetchHistory();
   }, []);
 
+  // 🔥 โหลดสินค้า
   const fetchProducts = async () => {
     try {
       const res = await axios.get("http://localhost/Web_app/backend/api/product.php", { withCredentials: true });
@@ -37,6 +48,7 @@ export default function Receive() {
     }
   };
 
+  // 🔥 โหลด history
   const fetchHistory = async () => {
     try {
       const res = await axios.get("http://localhost/Web_app/backend/api/stock_out.php", { withCredentials: true });
@@ -44,8 +56,8 @@ export default function Receive() {
       const formatted = data.map((item) => ({
         name: item.prod_name,
         qty: item.quantity,
-        fullDate: item.date || "",
-        displayTime: new Date(item.date).toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' }),
+        fullDate: item.date || "", 
+        displayTime: item.date ? new Date(item.date).toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' }) : "",
         note: item.note || "",
       }));
       setHistory(formatted);
@@ -90,12 +102,15 @@ export default function Receive() {
 
   const confirmSubmit = async () => {
     setLoading(true);
+    const nowLocal = getThaiToday(); 
+
     try {
       const requests = selectedItems.map((item) =>
         axios.post("http://localhost/Web_app/backend/api/stock_out.php", {
           prod_id: item.id,
           quantity: Number(item.qty),
           note,
+          date: nowLocal, 
           user_id: 1, 
         }, { withCredentials: true })
       );
@@ -117,31 +132,31 @@ export default function Receive() {
   const filteredHistory = history.filter((item) => item.fullDate === filterDate);
 
   return (
-    <div className="flex min-h-screen bg-gray-100 font-sans text-gray-900">
+    <div className="flex min-h-screen bg-gray-100 font-sans text-gray-900 font-kanit">
       <Sidebar />
       <div className="flex-1 flex flex-col">
         <Navbar />
         <main className="p-8 overflow-y-auto">
           <header className="mb-6">
             <h2 className="text-2xl font-bold mb-1">📤 บันทึกการเบิกสินค้า</h2>
-            <p className="text-gray-500 font-kanit">บันทึกรายการนำสินค้าออกจากคลังและตัดยอดสต็อก</p>
+            <p className="text-gray-500">บันทึกรายการนำสินค้าออกจากคลังและตัดยอดสต็อก</p>
           </header>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
-            <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-200 font-kanit">
+            <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-200">
               <div className="space-y-4 mb-6">
                 <input
                   type="text"
                   placeholder="🔍 ค้นหาสินค้าเพื่อเบิก..."
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
-                  className="w-full border-0 bg-gray-50 px-5 py-3 rounded-2xl focus:ring-2 focus:ring-red-500 outline-none transition-all"
+                  className="w-full border-0 bg-gray-50 px-5 py-3 rounded-2xl focus:ring-2 focus:ring-red-500 outline-none transition-all font-kanit"
                 />
                 <div className="flex gap-3">
                   <select
                     value={selectedCategory}
                     onChange={(e) => setSelectedCategory(e.target.value)}
-                    className="w-full border-0 bg-gray-50 px-4 py-2 rounded-2xl text-sm focus:ring-2 focus:ring-red-500 outline-none cursor-pointer"
+                    className="border-0 bg-gray-50 px-4 py-2 rounded-2xl text-sm focus:ring-2 focus:ring-red-500 outline-none cursor-pointer font-kanit"
                   >
                     {categories.map((cat) => (
                       <option key={cat} value={cat}>{cat === "all" ? "ทุกหมวดหมู่" : cat}</option>
@@ -168,14 +183,13 @@ export default function Receive() {
                       
                       {selected && (
                         <div className="flex items-center gap-2 bg-gray-100 p-1 rounded-2xl border border-gray-100">
-                          <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wider pl-2">จำนวน:</span>
+                          <span className="text-[10px] text-gray-400 font-bold uppercase pl-2">จำนวน:</span>
                           <input
                             type="text"
                             inputMode="numeric"
                             value={selected.qty}
-                            placeholder="0"
                             onChange={(e) => updateQty(item.id, e.target.value)}
-                            className="w-14 bg-white border-0 py-1.5 rounded-xl text-center font-black text-red-600 focus:ring-0 outline-none shadow-sm"
+                            className="w-14 bg-white border-0 py-1.5 rounded-xl text-center font-black text-red-600 focus:ring-0 outline-none shadow-sm font-kanit"
                           />
                         </div>
                       )}
@@ -188,20 +202,20 @@ export default function Receive() {
                 placeholder="เหตุผลการเบิก / หมายเหตุ..."
                 value={note}
                 onChange={(e) => setNote(e.target.value)}
-                className="w-full border-0 bg-gray-50 p-4 rounded-2xl min-h-[100px] focus:ring-1 focus:ring-red-500 outline-none text-sm mb-4"
+                className="w-full border-0 bg-gray-50 p-4 rounded-2xl min-h-[100px] focus:ring-1 focus:ring-red-500 outline-none text-sm mb-4 font-kanit"
               />
               <button
                 onClick={handlePreSubmit}
-                className="w-full bg-red-600 text-white py-4 rounded-2xl font-bold text-lg hover:bg-red-700 transition-all shadow-xl shadow-red-100 active:scale-[0.98]"
+                className="w-full bg-red-600 text-white py-4 rounded-2xl font-bold text-lg hover:bg-red-700 transition-all shadow-xl shadow-red-100 active:scale-[0.98] font-kanit"
               >
                 บันทึกการเบิกสินค้า
               </button>
             </div>
 
-            <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-200 flex flex-col h-[650px] font-kanit">
-              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-3 flex-none">
+            <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-200 flex flex-col h-[650px]">
+              <div className="flex justify-between items-center mb-6 gap-3 flex-none">
                 <h3 className="font-bold text-lg flex items-center gap-2">📜 ประวัติการเบิก</h3>
-                <input type="date" value={filterDate} onChange={(e) => setFilterDate(e.target.value)} className="border-0 bg-gray-100 px-4 py-2 rounded-xl text-sm outline-none" />
+                <input type="date" value={filterDate} onChange={(e) => setFilterDate(e.target.value)} className="border-0 bg-gray-100 px-4 py-2 rounded-xl text-sm outline-none font-kanit" />
               </div>
 
               <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar space-y-3 font-kanit">
@@ -212,10 +226,10 @@ export default function Receive() {
                   </div>
                 ) : (
                   filteredHistory.map((item, i) => (
-                    <div key={i} className="bg-gray-50 p-4 rounded-2xl flex justify-between items-center border border-gray-50 hover:border-red-200 transition-all group shadow-sm">
+                    <div key={i} className="bg-gray-50 p-4 rounded-2xl flex justify-between items-center border border-gray-50 hover:border-red-200 transition-all shadow-sm">
                       <div>
                         <p className="font-bold text-gray-800">{item.name}</p>
-                        <p className="text-[10px] text-gray-400 font-medium uppercase tracking-widest mt-0.5">🕙 เวลา {item.displayTime} น.</p>
+                        <p className="text-[10px] text-gray-400 font-medium mt-0.5">🕙 เวลา {item.displayTime} น.</p>
                         {item.note && <p className="text-xs text-red-400 mt-2 bg-red-50 px-2 py-1 rounded-lg w-fit">📝 {item.note}</p>}
                       </div>
                       <div className="bg-red-100 text-red-700 px-4 py-2 rounded-2xl font-black">-{item.qty}</div>
@@ -243,8 +257,8 @@ export default function Receive() {
               ))}
             </div>
             <div className="flex gap-4">
-              <button onClick={() => setIsModalOpen(false)} className="flex-1 py-4 rounded-2xl border border-gray-200 font-bold text-gray-400 hover:bg-gray-50">ยกเลิก</button>
-              <button onClick={confirmSubmit} disabled={loading} className="flex-1 py-4 rounded-2xl bg-black text-white font-bold hover:bg-gray-800 transition-all shadow-lg">
+              <button onClick={() => setIsModalOpen(false)} className="flex-1 py-4 rounded-2xl border border-gray-200 font-bold text-gray-400 hover:bg-gray-50 font-kanit">ยกเลิก</button>
+              <button onClick={confirmSubmit} disabled={loading} className="flex-1 py-4 rounded-2xl bg-black text-white font-bold hover:bg-gray-800 transition-all shadow-lg font-kanit">
                 {loading ? "กำลังบันทึก..." : "ยืนยันเบิกออก"}
               </button>
             </div>

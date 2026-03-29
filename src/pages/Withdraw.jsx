@@ -8,7 +8,12 @@ const api = axios.create({
   withCredentials: true,
 });
 
-export default function Withdraw() {
+// 🕒 1. สร้างฟังก์ชันไว้นอก Component เพื่อให้เรียกใช้ได้ทันทีไม่ต้องรอ Render
+const getThaiToday = () => {
+  return new Date().toLocaleDateString('sv-SE'); 
+};
+
+export default function Receive() {
   const [products, setProducts] = useState([]);
   const [search, setSearch] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
@@ -16,8 +21,10 @@ export default function Withdraw() {
   const [note, setNote] = useState("");
   const [history, setHistory] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [filterDate, setFilterDate] = useState(new Date().toISOString().split("T")[0]);
   const [loading, setLoading] = useState(true);
+
+  // ✅ 2. แก้ตรงนี้: เซตค่าเริ่มต้นเป็นวันที่ปัจจุบันทันที (ห้ามใส่ "")
+  const [filterDate, setFilterDate] = useState(getThaiToday());
 
   const fetchProducts = async () => {
     try {
@@ -40,6 +47,10 @@ export default function Withdraw() {
   };
 
   useEffect(() => {
+    // 🕒 3. อัปเดตเผื่อไว้กรณีเปิดเครื่องข้ามวัน
+    const today = getThaiToday();
+    setFilterDate(today); 
+
     fetchProducts();
     fetchHistory();
   }, []);
@@ -57,13 +68,11 @@ export default function Withdraw() {
     if (exists) {
       setSelectedItems(selectedItems.filter((i) => i.prod_id !== product.prod_id));
     } else {
-      setSelectedItems([...selectedItems, { ...product, qty: "" }]); // เริ่มต้นเป็นค่าว่างเพื่อให้พิมพ์ง่าย
+      setSelectedItems([...selectedItems, { ...product, qty: "" }]);
     }
   };
 
-  // ✅ ฟังก์ชันใหม่: รับค่าเป็น Text และเช็คเฉพาะตัวเลขเท่านั้น
   const updateQty = (prod_id, value) => {
-    // อนุญาตเฉพาะตัวเลข 0-9 และค่าว่าง (เผื่อลบพิมพ์ใหม่)
     if (value === "" || /^[0-9]+$/.test(value)) {
       setSelectedItems((prev) =>
         prev.map((item) =>
@@ -86,12 +95,16 @@ export default function Withdraw() {
 
   const confirmSubmit = async () => {
     try {
+      const currentToday = getThaiToday(); // ดึงวันที่ล่าสุดตอนกดปุ่ม
       for (let item of selectedItems) {
         await api.post("/stock_in.php", {
           prod_id: item.prod_id,
-          quantity: Number(item.qty), // แปลงกลับเป็น Number ก่อนส่ง API
+          quantity: Number(item.qty),
+          date: currentToday, // ✅ ส่งวันที่ปัจจุบันไปบันทึก
+          note: note
         });
       }
+      alert("บันทึกรับเข้าสำเร็จแล้วจ้า! ✨");
       await fetchHistory();
       await fetchProducts();
       setSelectedItems([]);
@@ -103,30 +116,30 @@ export default function Withdraw() {
     }
   };
 
+  // กรองประวัติ: ตอนนี้ filterDate จะมีค่า "2026-03-30" ตั้งแต่เริ่มโหลด ทำให้ข้อมูลขึ้นทันที
   const filteredHistory = history.filter((item) => item.date === filterDate);
 
   return (
-    <div className="flex min-h-screen bg-gray-100 font-sans text-gray-900">
+    <div className="flex min-h-screen bg-gray-100 font-sans text-gray-900 font-kanit">
       <Sidebar />
       <div className="flex-1 flex flex-col">
         <Navbar />
         <main className="p-8 overflow-y-auto">
           <header className="mb-6">
-            <h2 className="text-2xl font-bold mb-1 font-kanit">📥 รับสินค้าเข้าคลัง</h2>
+            <h2 className="text-2xl font-bold mb-1">📥 รับสินค้าเข้าคลัง</h2>
             <p className="text-gray-500">เพิ่มจำนวนสต็อกสินค้าเข้าระบบจัดการคลัง</p>
           </header>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
-            {/* LEFT SIDE */}
             <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-200">
               <div className="space-y-4 mb-6">
                 <input type="text" placeholder="🔍 ค้นชื่อสินค้าที่ต้องการรับเข้า..."
                   value={search} onChange={(e) => setSearch(e.target.value)}
-                  className="w-full border-0 bg-gray-50 px-5 py-3 rounded-2xl focus:ring-2 focus:ring-green-500 outline-none transition-all"
+                  className="w-full border-0 bg-gray-50 px-5 py-3 rounded-2xl focus:ring-2 focus:ring-green-500 outline-none transition-all font-kanit"
                 />
                 <div className="flex gap-3">
                   <select value={selectedCategory} onChange={(e) => setSelectedCategory(e.target.value)}
-                    className="border-0 bg-gray-50 px-4 py-2 rounded-2xl text-sm focus:ring-2 focus:ring-green-500 outline-none cursor-pointer">
+                    className="border-0 bg-gray-50 px-4 py-2 rounded-2xl text-sm focus:ring-2 focus:ring-green-500 outline-none cursor-pointer font-kanit">
                     {categories.map((cat) => (
                       <option key={cat} value={cat}>{cat === "all" ? "ทุกหมวดหมู่" : cat}</option>
                     ))}
@@ -136,9 +149,9 @@ export default function Withdraw() {
 
               <div className="max-h-80 overflow-y-auto space-y-2 bg-gray-50 rounded-2xl p-4 mb-6 custom-scrollbar">
                 {loading ? (
-                  <p className="text-center text-gray-400 py-10">กำลังโหลด...</p>
+                  <p className="text-center text-gray-400 py-10 font-kanit">กำลังโหลด...</p>
                 ) : filteredProducts.length === 0 ? (
-                  <p className="text-center text-gray-400 py-10">ไม่พบสินค้า</p>
+                  <p className="text-center text-gray-400 py-10 font-kanit">ไม่พบสินค้า</p>
                 ) : filteredProducts.map((item) => {
                   const selected = selectedItems.find((i) => i.prod_id === item.prod_id);
                   return (
@@ -154,17 +167,16 @@ export default function Withdraw() {
                         </div>
                       </div>
                       
-                      {/* ✅ ส่วนที่แก้ไข: Input แบบ Text รับเฉพาะตัวเลข */}
                       {selected && (
                         <div className="flex items-center gap-2">
-                          <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">จำนวน:</span>
+                          <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wider pl-2">จำนวน:</span>
                           <input 
                             type="text" 
                             inputMode="numeric" 
                             value={selected.qty}
                             placeholder="0"
                             onChange={(e) => updateQty(item.prod_id, e.target.value)}
-                            className="w-14 bg-gray-100 border-0 px-1 py-1.5 rounded-xl text-center font-black text-green-600 focus:ring-2 focus:ring-green-500 outline-none transition-all shadow-inner"
+                            className="w-14 bg-gray-100 border-0 px-1 py-1.5 rounded-xl text-center font-black text-green-600 focus:ring-2 focus:ring-green-500 outline-none transition-all shadow-inner font-kanit"
                           />
                         </div>
                       )}
@@ -178,17 +190,16 @@ export default function Withdraw() {
                 className="w-full border-0 bg-gray-50 p-4 rounded-2xl min-h-[100px] focus:ring-1 focus:ring-green-500 outline-none text-sm mb-4 font-kanit"
               />
               <button onClick={handlePreSubmit}
-                className="w-full bg-green-600 text-white py-4 rounded-2xl font-bold text-lg hover:bg-green-700 transition-all shadow-xl shadow-green-100 active:scale-[0.98]">
+                className="w-full bg-green-600 text-white py-4 rounded-2xl font-bold text-lg hover:bg-green-700 transition-all shadow-xl shadow-green-100 active:scale-[0.98] font-kanit">
                 ยืนยันการรับเข้า
               </button>
             </div>
 
-            {/* RIGHT SIDE: History */}
             <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-200 flex flex-col h-[650px]">
               <div className="flex justify-between items-center mb-6 flex-none">
                 <h3 className="font-bold text-lg">📜 ประวัติรับสินค้า</h3>
                 <input type="date" value={filterDate} onChange={(e) => setFilterDate(e.target.value)}
-                  className="border-0 bg-gray-100 px-4 py-2 rounded-xl text-sm outline-none"
+                  className="border-0 bg-gray-100 px-4 py-2 rounded-xl text-sm outline-none font-kanit"
                 />
               </div>
               <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar space-y-3 font-kanit">
@@ -202,7 +213,7 @@ export default function Withdraw() {
                     <div>
                       <p className="font-bold text-gray-800">{item.prod_name}</p>
                       <p className="text-[10px] text-gray-400 uppercase tracking-widest mt-0.5">
-                        👤 {item.user_name} · 📅 {item.date}
+                         👤 {item.user_name} · 📅 {item.date}
                       </p>
                     </div>
                     <div className="bg-green-100 text-green-700 px-4 py-2 rounded-2xl font-black group-hover:scale-110 transition-transform">
@@ -216,7 +227,6 @@ export default function Withdraw() {
         </main>
       </div>
 
-      {/* MODAL ยืนยัน */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/40 backdrop-blur-md" onClick={() => setIsModalOpen(false)} />
@@ -224,11 +234,11 @@ export default function Withdraw() {
             <div className="p-8">
               <div className="w-20 h-20 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-6 text-3xl shadow-inner">✓</div>
               <h3 className="text-2xl font-black text-center mb-2 font-kanit">ยืนยันรับเข้าสต็อก?</h3>
-              <p className="text-gray-400 text-center text-sm mb-6">กรุณาตรวจสอบรายการสินค้าที่เลือก</p>
+              <p className="text-gray-400 text-center text-sm mb-6 font-kanit">กรุณาตรวจสอบรายการสินค้าที่เลือก</p>
               <div className="bg-gray-50 rounded-3xl p-5 mb-8 max-h-52 overflow-y-auto border border-gray-100 text-sm">
                 {selectedItems.map((item) => (
-                  <div key={item.prod_id} className="flex justify-between py-2.5 border-b border-dashed border-gray-200 last:border-0">
-                    <span className="text-gray-600 font-medium font-kanit">{item.prod_name}</span>
+                  <div key={item.prod_id} className="flex justify-between py-2.5 border-b border-dashed border-gray-200 last:border-0 font-kanit">
+                    <span className="text-gray-600 font-medium">{item.prod_name}</span>
                     <span className="font-bold text-green-600">+{item.qty} ชิ้น</span>
                   </div>
                 ))}
@@ -249,6 +259,8 @@ export default function Withdraw() {
       )}
 
       <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;700;800&display=swap');
+        .font-kanit { font-family: 'Kanit', sans-serif; }
         .custom-scrollbar::-webkit-scrollbar { width: 5px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #E5E7EB; border-radius: 10px; }
@@ -258,7 +270,6 @@ export default function Withdraw() {
           100% { transform: scale(1); opacity: 1; }
         }
         .animate-pop-in { animation: pop-in 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
-        .font-kanit { font-family: 'Kanit', sans-serif; }
       `}</style>
     </div>
   );
