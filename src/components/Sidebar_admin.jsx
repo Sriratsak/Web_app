@@ -20,35 +20,24 @@ const menuItems = [
     activeTo: "to-violet-400",
     activeShadow: "shadow-violet-200",
   },
-  {
-    to: "/withdraw_admin",
-    label: "รับสินค้าเข้าคลัง",
-    emoji: "📤",
-    particles: ["🚚", "📦", "⬆️", "💨", "✨", "🎯", "⚡", "💥"],
-    activeFrom: "from-cyan-500",
-    activeTo: "to-cyan-400",
-    activeShadow: "shadow-cyan-200",
-  },
-  {
-    to: "/receive_admin",
-    label: "เบิกสินค้าออกจากคลัง",
-    emoji: "📥",
-    particles: ["🛒", "📦", "⬇️", "💨", "🌟", "🎁", "✨", "💫"],
-    activeFrom: "from-emerald-500",
-    activeTo: "to-emerald-400",
-    activeShadow: "shadow-emerald-200",
-  },
-
-  // ✅ เพิ่มตรงนี้
-  {
-    to: "/users_admin",
-    label: "จัดการผู้ใช้",
-    emoji: "👤",
-    particles: ["👨‍💻", "👩‍💻", "🧑", "✨", "💫", "⭐"],
-    activeFrom: "from-pink-500",
-    activeTo: "to-pink-400",
-    activeShadow: "shadow-pink-200",
-  },
+  // {
+  //   to: "/withdraw_admin",
+  //   label: "รับสินค้าเข้าคลัง",
+  //   emoji: "📤",
+  //   particles: ["🚚", "📦", "⬆️", "💨", "✨", "🎯", "⚡", "💥"],
+  //   activeFrom: "from-cyan-500",
+  //   activeTo: "to-cyan-400",
+  //   activeShadow: "shadow-cyan-200",
+  // },
+  // {
+  //   to: "/receive_admin",
+  //   label: "เบิกสินค้าออกจากคลัง",
+  //   emoji: "📥",
+  //   particles: ["🛒", "📦", "⬇️", "💨", "🌟", "🎁", "✨", "💫"],
+  //   activeFrom: "from-emerald-500",
+  //   activeTo: "to-emerald-400",
+  //   activeShadow: "shadow-emerald-200",
+  // },
 ];
 
 const particleStyles = `

@@ -37,7 +37,14 @@ if($method === "GET"){
         $result = $product->getById($id);
         echo json_encode($result ? $result : ["message" => "ไม่พบสินค้า"]);
     }else{
-        echo json_encode($product->getAll());
+       $data = $product->getAll();
+
+// 🔥 บังคับให้ quantity เป็น number + กันติดลบ
+foreach ($data as &$row) {
+    $row['quantity'] = max(0, (int)$row['quantity']);
+}
+
+echo json_encode($data);
     }
 }
 
