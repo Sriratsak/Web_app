@@ -3,23 +3,24 @@ import Sidebar from "../components/Sidebar_admin";
 import Navbar from "../components/Navbar";
 import axios from "axios";
 
+// ✅ สร้าง instance axios
 const api = axios.create({
-  baseURL: "http://localhost/Web_app/backend/api",
-  withCredentials: true,
+  baseURL: "http://localhost/Web_app/backend/api", // path จริงของ PHP
+  withCredentials: true, // ส่ง session ไปให้ PHP
 });
 
-export default function Withdraw_admin(){
-  const [products, setProducts]           = useState([]);
-  const [search, setSearch]               = useState("");
+export default function Withdraw_admin() {
+  const [products, setProducts] = useState([]);
+  const [search, setSearch] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [selectedItems, setSelectedItems] = useState([]);
-  const [note, setNote]                   = useState("");
-  const [history, setHistory]             = useState([]);
-  const [isModalOpen, setIsModalOpen]     = useState(false);
-  const [filterDate, setFilterDate]       = useState(new Date().toISOString().split("T")[0]);
-  const [loading, setLoading]             = useState(true);
+  const [note, setNote] = useState("");
+  const [history, setHistory] = useState([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [filterDate, setFilterDate] = useState(new Date().toISOString().split("T")[0]);
+  const [loading, setLoading] = useState(true);
 
-  // ✅ ดึงสินค้าจาก API
+  // ✅ GET สินค้า
   const fetchProducts = async () => {
     try {
       const res = await api.get("/product.php");
@@ -29,7 +30,7 @@ export default function Withdraw_admin(){
     }
   };
 
-  // ✅ ดึงประวัติ stock_in จาก API
+  // ✅ GET ประวัติ stock
   const fetchHistory = async () => {
     try {
       const res = await api.get("/stock_in.php");
@@ -46,31 +47,34 @@ export default function Withdraw_admin(){
     fetchHistory();
   }, []);
 
-  const categories = ["all", ...new Set(products.map((p) => p.cat_name).filter(Boolean))];
+  const categories = ["all", ...new Set(products.map(p => p.cat_name).filter(Boolean))];
 
-  const filteredProducts = products.filter((p) => {
-    const matchSearch   = p.prod_name?.toLowerCase().includes(search.toLowerCase());
+  const filteredProducts = products.filter(p => {
+    const matchSearch = p.prod_name?.toLowerCase().includes(search.toLowerCase());
     const matchCategory = selectedCategory === "all" || p.cat_name === selectedCategory;
     return matchSearch && matchCategory;
   });
 
   const toggleProduct = (product) => {
-    const exists = selectedItems.find((i) => i.prod_id === product.prod_id);
+    const exists = selectedItems.find(i => i.prod_id === product.prod_id);
     if (exists) {
-      setSelectedItems(selectedItems.filter((i) => i.prod_id !== product.prod_id));
+      setSelectedItems(selectedItems.filter(i => i.prod_id !== product.prod_id));
     } else {
       setSelectedItems([...selectedItems, { ...product, qty: 1 }]);
     }
   };
 
   const updateQty = (prod_id, qty) => {
-    setSelectedItems((prev) =>
-      prev.map((item) => item.prod_id === prod_id ? { ...item, qty: Number(qty) } : item)
+    setSelectedItems(prev =>
+      prev.map(item => item.prod_id === prod_id ? { ...item, qty: Number(qty) } : item)
     );
   };
 
   const handlePreSubmit = () => {
-    if (selectedItems.length === 0) { alert("กรุณาเลือกสินค้าก่อน"); return; }
+    if (selectedItems.length === 0) {
+      alert("กรุณาเลือกสินค้าก่อน");
+      return;
+    }
     for (let item of selectedItems) {
       if (!item.qty || item.qty <= 0) {
         alert(`กรุณากรอกจำนวนสินค้า ${item.prod_name}`);
@@ -80,12 +84,12 @@ export default function Withdraw_admin(){
     setIsModalOpen(true);
   };
 
-  // ✅ POST ไป stock_in.php จริง
+  // ✅ POST เพิ่ม stock เข้า DB
   const confirmSubmit = async () => {
     try {
       for (let item of selectedItems) {
         await api.post("/stock_in.php", {
-          prod_id:  item.prod_id,
+          prod_id: item.prod_id,
           quantity: item.qty,
         });
       }
@@ -100,8 +104,8 @@ export default function Withdraw_admin(){
     }
   };
 
-  // ✅ filter ประวัติตามวันที่
-  const filteredHistory = history.filter((item) => item.date === filterDate);
+  // ✅ filter ตามวันที่
+  const filteredHistory = history.filter(item => item.date === filterDate);
 
   return (
     <div className="flex min-h-screen bg-gray-100 font-sans text-gray-900">
@@ -115,18 +119,23 @@ export default function Withdraw_admin(){
           </header>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
-
             {/* LEFT */}
             <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-200">
               <div className="space-y-4 mb-6">
-                <input type="text" placeholder="🔍 ค้นชื่อสินค้าที่ต้องการรับเข้า..."
-                  value={search} onChange={(e) => setSearch(e.target.value)}
+                <input
+                  type="text"
+                  placeholder="🔍 ค้นชื่อสินค้าที่ต้องการรับเข้า..."
+                  value={search}
+                  onChange={e => setSearch(e.target.value)}
                   className="w-full border-0 bg-gray-50 px-5 py-3 rounded-2xl focus:ring-2 focus:ring-green-500 outline-none transition-all"
                 />
                 <div className="flex gap-3">
-                  <select value={selectedCategory} onChange={(e) => setSelectedCategory(e.target.value)}
-                    className="border-0 bg-gray-50 px-4 py-2 rounded-2xl text-sm focus:ring-2 focus:ring-green-500 outline-none cursor-pointer">
-                    {categories.map((cat) => (
+                  <select
+                    value={selectedCategory}
+                    onChange={e => setSelectedCategory(e.target.value)}
+                    className="border-0 bg-gray-50 px-4 py-2 rounded-2xl text-sm focus:ring-2 focus:ring-green-500 outline-none cursor-pointer"
+                  >
+                    {categories.map(cat => (
                       <option key={cat} value={cat}>{cat === "all" ? "ทุกหมวดหมู่" : cat}</option>
                     ))}
                   </select>
@@ -138,11 +147,13 @@ export default function Withdraw_admin(){
                   <p className="text-center text-gray-400 py-10">กำลังโหลด...</p>
                 ) : filteredProducts.length === 0 ? (
                   <p className="text-center text-gray-400 py-10">ไม่พบสินค้า</p>
-                ) : filteredProducts.map((item) => {
-                  const selected = selectedItems.find((i) => i.prod_id === item.prod_id);
+                ) : filteredProducts.map(item => {
+                  const selected = selectedItems.find(i => i.prod_id === item.prod_id);
                   return (
-                    <div key={item.prod_id}
-                      className={`flex justify-between items-center p-3 rounded-2xl border-2 transition-all ${selected ? "bg-white border-green-500 shadow-md" : "bg-transparent border-transparent"}`}>
+                    <div
+                      key={item.prod_id}
+                      className={`flex justify-between items-center p-3 rounded-2xl border-2 transition-all ${selected ? "bg-white border-green-500 shadow-md" : "bg-transparent border-transparent"}`}
+                    >
                       <div className="flex items-center gap-4 cursor-pointer select-none" onClick={() => toggleProduct(item)}>
                         <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all ${selected ? "bg-green-500 border-green-500" : "border-gray-300"}`}>
                           {selected && <div className="w-2 h-2 bg-white rounded-full" />}
@@ -155,8 +166,11 @@ export default function Withdraw_admin(){
                       {selected && (
                         <div className="flex items-center gap-2">
                           <span className="text-xs text-gray-400">จำนวน:</span>
-                          <input type="number" min="1" value={selected.qty}
-                            onChange={(e) => updateQty(item.prod_id, e.target.value)}
+                          <input
+                            type="number"
+                            min="1"
+                            value={selected.qty}
+                            onChange={e => updateQty(item.prod_id, e.target.value)}
                             className="w-16 bg-gray-100 border-0 px-2 py-1.5 rounded-xl text-center font-bold focus:ring-1 focus:ring-green-500 outline-none"
                           />
                         </div>
@@ -166,12 +180,16 @@ export default function Withdraw_admin(){
                 })}
               </div>
 
-              <textarea placeholder="เขียนบันทึกเพิ่มเติม (ถ้ามี)..."
-                value={note} onChange={(e) => setNote(e.target.value)}
+              <textarea
+                placeholder="เขียนบันทึกเพิ่มเติม (ถ้ามี)..."
+                value={note}
+                onChange={e => setNote(e.target.value)}
                 className="w-full border-0 bg-gray-50 p-4 rounded-2xl min-h-[100px] focus:ring-1 focus:ring-green-500 outline-none text-sm mb-4"
               />
-              <button onClick={handlePreSubmit}
-                className="w-full bg-green-600 text-white py-4 rounded-2xl font-bold text-lg hover:bg-green-700 transition-all shadow-xl shadow-green-100 active:scale-[0.98]">
+              <button
+                onClick={handlePreSubmit}
+                className="w-full bg-green-600 text-white py-4 rounded-2xl font-bold text-lg hover:bg-green-700 transition-all shadow-xl shadow-green-100 active:scale-[0.98]"
+              >
                 ยืนยันการรับเข้า
               </button>
             </div>
@@ -180,7 +198,10 @@ export default function Withdraw_admin(){
             <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-200 flex flex-col h-[650px]">
               <div className="flex justify-between items-center mb-6 flex-none">
                 <h3 className="font-bold text-lg">📜 ประวัติรับสินค้า</h3>
-                <input type="date" value={filterDate} onChange={(e) => setFilterDate(e.target.value)}
+                <input
+                  type="date"
+                  value={filterDate}
+                  onChange={e => setFilterDate(e.target.value)}
                   className="border-0 bg-gray-100 px-4 py-2 rounded-xl text-sm outline-none"
                 />
               </div>
@@ -219,7 +240,7 @@ export default function Withdraw_admin(){
               <h3 className="text-2xl font-black text-center mb-2">ยืนยันรับเข้าสต็อก?</h3>
               <p className="text-gray-400 text-center text-sm mb-6">กรุณาตรวจสอบรายการสินค้าที่เลือก</p>
               <div className="bg-gray-50 rounded-3xl p-5 mb-8 max-h-52 overflow-y-auto border border-gray-100 text-sm">
-                {selectedItems.map((item) => (
+                {selectedItems.map(item => (
                   <div key={item.prod_id} className="flex justify-between py-2.5 border-b border-dashed border-gray-200 last:border-0">
                     <span className="text-gray-600 font-medium">{item.prod_name}</span>
                     <span className="font-bold text-green-600">+{item.qty} ชิ้น</span>
@@ -227,12 +248,16 @@ export default function Withdraw_admin(){
                 ))}
               </div>
               <div className="flex gap-4">
-                <button onClick={() => setIsModalOpen(false)}
-                  className="flex-1 py-4 rounded-2xl border border-gray-200 font-bold text-gray-400 hover:bg-gray-50 transition-colors">
+                <button
+                  onClick={() => setIsModalOpen(false)}
+                  className="flex-1 py-4 rounded-2xl border border-gray-200 font-bold text-gray-400 hover:bg-gray-50 transition-colors"
+                >
                   ยกเลิก
                 </button>
-                <button onClick={confirmSubmit}
-                  className="flex-1 py-4 rounded-2xl bg-black text-white font-bold hover:bg-gray-800 transition-all shadow-lg">
+                <button
+                  onClick={confirmSubmit}
+                  className="flex-1 py-4 rounded-2xl bg-black text-white font-bold hover:bg-gray-800 transition-all shadow-lg"
+                >
                   ยืนยันบันทึก
                 </button>
               </div>
