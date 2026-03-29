@@ -158,7 +158,7 @@ function SidebarContent({ iconOnly = false, onNavigate }) {
         {!iconOnly && (
           <div className="min-w-0">
             <div className="title-shimmer text-[15px] font-bold tracking-tight leading-tight truncate">
-              Stock_management
+              Stock management
             </div>
             <span className="text-[10px] text-gray-400 uppercase tracking-widest font-normal">
               ระบบคลังสินค้า

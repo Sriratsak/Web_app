@@ -4,7 +4,7 @@ import Sidebar from "../components/Sidebar_admin";
 import Navbar from "../components/Navbar";
 
 export default function Users_admin() {
-  const API = "http://localhost/Web_app/backend/api";
+  const API = "http://localhost/Web_app/backend/models/user.php";
 
   const [users, setUsers] = useState([]);
   const [editUser, setEditUser] = useState(null);
@@ -18,53 +18,77 @@ export default function Users_admin() {
   const fetchUsers = async () => {
     setLoading(true);
     try {
-      const res = await axios.get(`${API}/user.php`);
-      setUsers(res.data);
+      const res = await axios.get(API);
+      // console.log("🚀 Users fetched from PHP:", res.data);
+
+      if (Array.isArray(res.data)) {
+        setUsers(res.data);
+      } else {
+        console.error("❌ Data is not an array:", res.data);
+        setUsers([]);
+      }
     } catch (err) {
+      console.error("❌ Fetch error:", err);
       alert("โหลดข้อมูลไม่สำเร็จ");
+      setUsers([]);
     }
     setLoading(false);
   };
 
-  // 🔍 filter
-  const filteredUsers = users.filter((u) =>
-    u.username.toLowerCase().includes(search.toLowerCase())
-  );
+  // filter
+  const filteredUsers = Array.isArray(users)
+    ? users.filter((u) =>
+        u.username.toLowerCase().includes(search.toLowerCase())
+      )
+    : [];
 
-  // ✏️ edit
+  // edit
   const handleEdit = (user) => {
     setEditUser({ ...user });
   };
 
   const handleSave = async () => {
-    if (!editUser.username) {
-      return alert("ห้ามชื่อว่าง");
-    }
+    if (!editUser.username) return alert("ห้ามชื่อว่าง");
 
     try {
-      await axios.put(`${API}/user.php/${editUser.id}`, editUser);
+      console.log("✏️ PUT data:", editUser);
+      // ส่ง PUT แบบ body ไม่ต้อง append id ใน URL
+      const res = await axios({
+        method: "put",
+        url: API,
+        data: editUser,
+      });
 
-      // ✅ update state ตรง (ไม่ต้อง fetch ใหม่)
-      setUsers((prev) =>
-        prev.map((u) => (u.id === editUser.id ? editUser : u))
-      );
-
-      setEditUser(null);
-    } catch {
+      if (res.data.success) {
+        setUsers((prev) =>
+          prev.map((u) => (u.id === editUser.id ? editUser : u))
+        );
+        setEditUser(null);
+      } else {
+        alert("แก้ไขไม่สำเร็จ: " + (res.data.error || res.data.message));
+      }
+    } catch (err) {
+      console.error("❌ Update error:", err);
       alert("แก้ไขไม่สำเร็จ");
     }
   };
 
-  // ❌ delete
+  // delete
   const handleDelete = async (id) => {
     if (!window.confirm("ลบ user นี้จริงไหม?")) return;
 
     try {
-      await axios.delete(`${API}/user.php/${id}`);
+      console.log("🗑️ DELETE id:", id);
+      // DELETE ใช้ query string ?id=
+      const res = await axios.delete(`${API}?id=${id}`);
 
-      // ✅ update state ทันที
-      setUsers((prev) => prev.filter((u) => u.id !== id));
-    } catch {
+      if (res.data.success) {
+        setUsers((prev) => prev.filter((u) => u.id !== id));
+      } else {
+        alert("ลบไม่สำเร็จ: " + (res.data.error || res.data.message));
+      }
+    } catch (err) {
+      console.error("❌ Delete error:", err);
       alert("ลบไม่สำเร็จ");
     }
   };
@@ -77,7 +101,6 @@ export default function Users_admin() {
         <Navbar />
 
         <main className="p-8">
-          {/* Header */}
           <div className="flex justify-between items-center mb-6">
             <div>
               <h2 className="text-2xl font-bold">จัดการผู้ใช้</h2>
@@ -87,15 +110,13 @@ export default function Users_admin() {
             </div>
           </div>
 
-          {/* 🔍 Search */}
           <input
-            placeholder="ค้นหา username..."
+            placeholder="ค้นหา ชื่อผู้ใช้งาน..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="border p-2 mb-4 w-full rounded"
           />
 
-          {/* Table */}
           {loading ? (
             <p>กำลังโหลด...</p>
           ) : (
@@ -146,7 +167,6 @@ export default function Users_admin() {
             </table>
           )}
 
-          {/* Modal */}
           {editUser && (
             <div className="fixed inset-0 bg-black/50 flex items-center justify-center">
               <div className="bg-white p-5 rounded w-80 shadow">

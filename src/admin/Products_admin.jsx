@@ -177,7 +177,7 @@ export default function Products_admin() {
                       />
                     </div>
                     <div className="mb-4">
-                      <label className="block text-sm mb-1">รายละเอียด</label>
+                      <label className="block text-sm mb-1">จำนวน</label>
                       <input
                         type="number"
                         value={editProduct.prod_capacity}
@@ -277,7 +277,7 @@ export default function Products_admin() {
                       ราคา
                     </th>
                     <th className="px-6 py-3 text-right uppercase tracking-wider">
-                      รายละเอียด
+                      จำนวน
                     </th>
                     <th className="px-6 py-3 text-left uppercase tracking-wider">
                       หมวดหมู่
@@ -405,7 +405,7 @@ export default function Products_admin() {
               </div>
 
               <div className="mb-4">
-                <label className="block text-sm mb-1">รายละเอียด</label>
+                <label className="block text-sm mb-1">จำนวน</label>
                 <input
                   type="number"
                   value={form.prod_capacity}
