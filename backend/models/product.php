@@ -10,27 +10,17 @@ class Product
 
     // ดึงสินค้าทั้งหมดพร้อมชื่อหมวดหมู่และจำนวนคงเหลือ
     public function getAll(){
-        $stmt = $this->conn->prepare("
-            SELECT 
-                p.*,
-                c.cat_name,
-                IFNULL(si.total_in,0) - IFNULL(so.total_out,0) AS quantity
-            FROM product p
-            LEFT JOIN category c ON p.cat_id = c.cat_id
-            LEFT JOIN (
-                SELECT prod_id, SUM(quantity) AS total_in
-                FROM stock_in
-                GROUP BY prod_id
-            ) si ON p.prod_id = si.prod_id
-            LEFT JOIN (
-                SELECT prod_id, SUM(quantity) AS total_out
-                FROM stock_out
-                GROUP BY prod_id
-            ) so ON p.prod_id = so.prod_id
-        ");
-        $stmt->execute();
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
-    }
+    $stmt = $this->conn->prepare("
+        SELECT 
+            p.*,
+            c.cat_name,
+            p.prod_capacity AS quantity
+        FROM product p
+        LEFT JOIN category c ON p.cat_id = c.cat_id
+    ");
+    $stmt->execute();
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
 
     // GET BY ID พร้อมชื่อหมวดหมู่
     public function getById($id){

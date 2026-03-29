@@ -28,21 +28,49 @@ return $rows;
 
     // ✅ แก้ให้ตรง schema จริง (ไม่มี quantity ใน product)
     public function create($prod_id, $quantity, $user_id) {
-        try {
-            $stmt = $this->conn->prepare("
-                INSERT INTO stock_in (prod_id, quantity, date, user_id)
-                VALUES (:pid, :qty, CURDATE(), :uid)
-            ");
-            $stmt->execute([
-                ":pid" => $prod_id,
-                ":qty" => $quantity,
-                ":uid" => $user_id
-            ]);
-            return ["status" => true, "id" => $this->conn->lastInsertId()];
-        } catch (Exception $e) {
-            return ["status" => false, "error" => $e->getMessage()];
-        }
+    try {
+
+        // 🔥 เริ่ม Transaction
+        $this->conn->beginTransaction();
+
+        // 1. เพิ่มประวัติ stock_in
+        $stmt = $this->conn->prepare("
+            INSERT INTO stock_in (prod_id, quantity, date, user_id)
+            VALUES (:pid, :qty, CURDATE(), :uid)
+        ");
+        $stmt->execute([
+            ":pid" => $prod_id,
+            ":qty" => $quantity,
+            ":uid" => $user_id
+        ]);
+
+        // 🔥 2. อัปเดต stock ใน product (สำคัญ)
+        $stmt = $this->conn->prepare("
+            UPDATE product 
+            SET prod_capacity = prod_capacity + :qty
+            WHERE prod_id = :pid
+        ");
+        $stmt->execute([
+            ":qty" => $quantity,
+            ":pid" => $prod_id
+        ]);
+
+        // 🔥 commit
+        $this->conn->commit();
+
+        return ["status" => true];
+
+    } catch (Exception $e) {
+
+        // ❌ ถ้ามี error rollback
+        $this->conn->rollBack();
+
+        return [
+            "status" => false,
+            "error" => $e->getMessage()
+        ];
     }
+}
 
     public function update($id, $prod_id, $quantity, $user_id, $date) {
         $stmt = $this->conn->prepare("
