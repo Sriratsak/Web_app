@@ -1,27 +1,27 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import Sidebar from "../components/Sidebar";
-import Navbar from "../components/Navbar"; // ✅ 1. Import เข้ามา
+import Navbar from "../components/Navbar";
 
 export default function Products() {
   const [open, setOpen] = useState(false);
 
-  // ฟอร์ม
+  // ฟอร์มสินค้า
   const [form, setForm] = useState({
-    prod_id: "",
     prod_name: "",
     prod_price: 0,
     prod_capacity: 0,
-    category_id: "",
+    cat_id: "",
   });
 
-  // ✅ เพิ่ม state เก็บสินค้า
-  const [products, setProducts] = useState([]);
+  // ฟอร์มหมวดหมู่ใหม่
+  const [newCategory, setNewCategory] = useState("");
 
-  // เก็บหมวดหมู่
+  // ข้อมูลสินค้าและหมวดหมู่
+  const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
 
-  // ดึงข้อมูลสินค้าเมื่อโหลดหน้า
+  // โหลดข้อมูลเมื่อหน้าเปิด
   useEffect(() => {
     fetchProducts();
     fetchCategories();
@@ -29,38 +29,38 @@ export default function Products() {
 
   const fetchProducts = async () => {
     try {
-      const response = await axios.get(
-        "http://localhost/Web_app/backend/api/product.php"
+      const res = await axios.get(
+        "http://localhost/Web_app/backend/api/product.php",
       );
-      setProducts(response.data);
-    } catch (error) {
-      console.error("Error fetching products:", error);
+      setProducts(res.data);
+    } catch (err) {
+      console.error("Error fetching products:", err);
     }
   };
 
   const fetchCategories = async () => {
     try {
-      const response = await axios.get(
-        "http://localhost/Web_app/backend/api/category.php"
+      const res = await axios.get(
+        "http://localhost/Web_app/backend/api/category.php",
       );
-      setCategories(response.data);
-    } catch (error) {
-      console.error("Error fetching categories:", error);
+      setCategories(res.data);
+    } catch (err) {
+      console.error("Error fetching categories:", err);
     }
   };
 
   // เพิ่มสินค้า
   const handleAddProduct = async () => {
     try {
-      let cat_id_to_use = form.category_id;
+      let cat_id_to_use = form.cat_id;
 
-      // ถ้ามีกรอกหมวดหมู่ใหม่ ให้สร้างหมวดหมู่ก่อน
+      // สร้างหมวดหมู่ใหม่ถ้ามี
       if (newCategory.trim() !== "") {
         const res = await axios.post(
           "http://localhost/Web_app/backend/api/category.php",
-          { cat_name: newCategory }
+          { name: newCategory }, // ต้องตรงกับ PHP
         );
-        cat_id_to_use = res.data.cat_id; // สมมติ API return cat_id ของหมวดหมู่ใหม่
+        cat_id_to_use = res.data.cat_id;
       }
 
       // เพิ่มสินค้า
@@ -71,51 +71,69 @@ export default function Products() {
         cat_id: cat_id_to_use,
       });
 
-      // Reset form
-      setOpen(false);
-      setForm({ prod_id: "", prod_name: "", prod_price: 0, prod_capacity: 0, category_id: "" });
+      // รีเซ็ตฟอร์มและโหลดข้อมูลใหม่
+      setForm({ prod_name: "", prod_price: 0, prod_capacity: 0, cat_id: "" });
       setNewCategory("");
+      setOpen(false);
       fetchProducts();
-      fetchCategories(); // โหลดหมวดหมู่ใหม่
-    } catch (error) {
-      console.error("Error adding product:", error);
+      fetchCategories();
+    } catch (err) {
+      console.error("Error adding product:", err);
     }
   };
+  // State สำหรับ modal เพิ่มหมวดหมู่
+  const [openCategory, setOpenCategory] = useState(false);
 
+  // ฟังก์ชันเพิ่มหมวดหมู่
+  const handleAddCategory = async () => {
+    try {
+      if (!newCategory.trim()) return alert("กรุณากรอกชื่อหมวดหมู่");
+
+      const res = await axios.post(
+        "http://localhost/Web_app/backend/api/category.php",
+        { cat_name: newCategory },
+      );
+
+      if (res.data.success) {
+        fetchCategories(); // โหลดหมวดหมู่ใหม่
+        setNewCategory("");
+        setOpenCategory(false);
+      }
+    } catch (err) {
+      console.error("Error adding category:", err);
+    }
+  };
   return (
     <div className="flex min-h-screen bg-gray-100">
       <Sidebar />
-
       <div className="flex-1 flex flex-col">
-        {/* Topbar */}
-        <header className="h-16 bg-white shadow px-6 flex justify-between items-center">
-          <h1 className="text-xl font-semibold"></h1>
+        <Navbar />
 
-          <div className="flex items-center gap-4">
-            <span className="text-sm text-gray-500">ผู้ใช้งาน: แอดมิน</span>
-            <button className="bg-gray-200 px-3 py-1 rounded-lg text-sm">
-              ออกจากระบบ
-            </button>
-          </div>
-        </header>
-
-        {/* Main Content */}
         <main className="p-8">
-          {/* Header ส่วนหัวของหน้าจัดการสินค้า */}
           <div className="flex justify-between items-center mb-6">
             <div>
               <h2 className="text-2xl font-bold">จัดการสินค้า</h2>
               <p className="text-gray-500">จัดการข้อมูลสินค้าในคลัง</p>
             </div>
-            <button
-              onClick={() => setOpen(true)}
-              className="bg-black text-white px-4 py-2 rounded-lg text-sm hover:bg-gray-800"
-            >
-              + เพิ่มสินค้าใหม่
-            </button>
+
+            {/* ปุ่มชิดขวา */}
+            <div className="flex gap-2">
+              <button
+                onClick={() => setOpenCategory(true)} // เปิด modal เพิ่มหมวดหมู่
+                className="bg-black  text-white px-4 py-2 rounded-lg text-sm hover:bg-gray-600"
+              >
+                + เพิ่มหมวดหมู่
+              </button>
+
+              <button
+                onClick={() => setOpen(true)} // เปิด modal เพิ่มสินค้า
+                className="bg-black text-white px-4 py-2 rounded-lg text-sm hover:bg-gray-800"
+              >
+                + เพิ่มสินค้าใหม่
+              </button>
+            </div>
           </div>
 
-          {/* Card แสดงรายการสินค้า */}
           <div className="bg-white rounded-2xl shadow p-6">
             <div className="mb-4">
               <h3 className="font-semibold">รายการสินค้า</h3>
@@ -124,97 +142,151 @@ export default function Products() {
               </p>
             </div>
 
-            {/* ค้นหา */}
-            <div className="mb-6">
-              <input
-                type="text"
-                placeholder="🔍 ค้นหารายการสินค้า..."
-                className="w-full bg-gray-100 px-4 py-2 rounded-lg outline-none text-sm"
-              />
-            </div>
-
-            {/* 🔥 แสดงสินค้า */}
             {products.length === 0 ? (
               <div className="flex justify-center items-center h-40 text-gray-400 text-sm">
                 ไม่พบข้อมูลสินค้า
               </div>
             ) : (
-              <ul className="space-y-2">
-                {products.map((item, index) => (
-                  <li className="flex justify-between items-center bg-white border rounded-xl p-4 shadow-sm hover:shadow-md transition">
-                    {/* ซ้าย */}
-                    <div>
-                      <p className="font-semibold text-gray-800 text-base">
-                        {item.name}
-                      </p>
-                      <p className="text-xs text-gray-400 mt-1">
-                        รหัส: {item.sku}
-                      </p>
-                    </div>
-
-                    {/* ขวา */}
-                    <div className="bg-blue-100 text-blue-600 px-3 py-1 rounded-full text-sm font-medium">
-                      {item.qty}
-                    </div>
-                  </li>
-                ))}
-              </ul>
+              <table className="w-full table-auto border-collapse border border-gray-200">
+                <thead>
+                  <tr className="bg-gray-100">
+                    <th className="border px-4 py-2 text-left">ชื่อสินค้า</th>
+                    <th className="border px-4 py-2 text-right">ราคา</th>
+                    <th className="border px-4 py-2 text-right">จำนวน</th>
+                    <th className="border px-4 py-2 text-left">หมวดหมู่</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {products.map((p, idx) => (
+                    <tr key={idx} className="hover:bg-gray-50">
+                      <td className="border px-4 py-2">{p.prod_name}</td>
+                      <td className="border px-4 py-2 text-right">
+                        {p.prod_price}
+                      </td>
+                      <td className="border px-4 py-2 text-right">
+                        {p.prod_capacity}
+                      </td>
+                      <td className="border px-4 py-2">{p.cat_name}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             )}
           </div>
         </main>
+        {openCategory && (
+          <div className="fixed inset-0 bg-black/30 flex justify-center items-center z-50">
+            <div className="bg-white w-full max-w-md p-6 rounded-2xl shadow-lg">
+              <h2 className="text-lg font-semibold mb-6">เพิ่มหมวดหมู่</h2>
 
-        {/* Modal */}
+              <div className="mb-4">
+                <label className="block text-sm mb-1">ชื่อหมวดหมู่</label>
+                <input
+                  type="text"
+                  value={newCategory}
+                  onChange={(e) => setNewCategory(e.target.value)}
+                  className="w-full bg-gray-100 border rounded-lg px-4 py-2"
+                  placeholder="กรอกชื่อหมวดหมู่ใหม่"
+                />
+              </div>
+
+              <div className="flex gap-2 mt-6">
+                <button
+                  onClick={() => setOpenCategory(false)}
+                  className="w-1/2 bg-gray-200 py-2 rounded-lg"
+                >
+                  ยกเลิก
+                </button>
+                <button
+                  onClick={() => {
+                    if (
+                      window.confirm(
+                        `คุณต้องการเพิ่มหมวดหมู่ "${newCategory}" หรือไม่?`,
+                      )
+                    ) {
+                      handleAddCategory();
+                    }
+                  }}
+                  className="w-1/2 bg-blue-600 text-white py-2 rounded-lg"
+                >
+                  บันทึก
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+        {/* Modal เพิ่มสินค้า */}
         {open && (
           <div className="fixed inset-0 bg-black/30 flex justify-center items-center">
             <div className="bg-white w-full max-w-md p-6 rounded-2xl shadow-lg">
               <h2 className="text-lg font-semibold mb-6">เพิ่มสินค้า</h2>
 
-              {/* SKU */}
-              <div className="mb-4">
-                <label className="block text-sm mb-1">รหัสสินค้า</label>
-                <input
-                  type="text"
-                  value={form.sku}
-                  onChange={(e) => setForm({ ...form, sku: e.target.value })}
-                  className="w-full bg-gray-100 border rounded-lg px-4 py-2"
-                />
-              </div>
-
-              {/* Name */}
               <div className="mb-4">
                 <label className="block text-sm mb-1">ชื่อสินค้า</label>
                 <input
                   type="text"
-                  value={form.name}
-                  onChange={(e) => setForm({ ...form, name: e.target.value })}
+                  value={form.prod_name}
+                  onChange={(e) =>
+                    setForm({ ...form, prod_name: e.target.value })
+                  }
+                  className="w-full bg-gray-100 border rounded-lg px-4 py-2"
+                />
+              </div>
+              <div className="mb-4">
+                <label className="block text-sm mb-1">เลือกหมวดหมู่</label>
+                <select
+                  value={form.cat_id}
+                  onChange={(e) => setForm({ ...form, cat_id: e.target.value })}
+                  className="w-full bg-gray-100 border rounded-lg px-4 py-2"
+                >
+                  <option value="">-- เลือกหมวดหมู่ --</option>
+                  {categories.map((c) => (
+                    <option key={c.cat_id} value={c.cat_id}>
+                      {c.cat_name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="mb-4">
+                <label className="block text-sm mb-1">ราคา</label>
+                <input
+                  type="number"
+                  value={form.prod_price}
+                  onChange={(e) =>
+                    setForm({ ...form, prod_price: e.target.value })
+                  }
                   className="w-full bg-gray-100 border rounded-lg px-4 py-2"
                 />
               </div>
 
-              {/* Qty */}
-              <div className="mb-6">
+              <div className="mb-4">
                 <label className="block text-sm mb-1">จำนวน</label>
                 <input
                   type="number"
-                  value={form.qty}
-                  onChange={(e) => setForm({ ...form, qty: e.target.value })}
+                  value={form.prod_capacity}
+                  onChange={(e) =>
+                    setForm({ ...form, prod_capacity: e.target.value })
+                  }
                   className="w-full bg-gray-100 border rounded-lg px-4 py-2"
                 />
               </div>
-
-              <div className="flex gap-2">
+              <div className="flex gap-2 mt-6">
                 <button
                   onClick={() => setOpen(false)}
                   className="w-1/2 bg-gray-200 py-2 rounded-lg"
                 >
                   ยกเลิก
                 </button>
-
                 <button
                   onClick={() => {
-                    setProducts([...products, form]); // ✅ เพิ่มสินค้า
-                    setOpen(false);
-                    setForm({ sku: "", name: "", qty: 0 });
+                    if (
+                      window.confirm(
+                        `คุณต้องการเพิ่มสินค้า "${form.prod_name}" หรือไม่?`,
+                      )
+                    ) {
+                      handleAddProduct();
+                    }
                   }}
                   className="w-1/2 bg-blue-600 text-white py-2 rounded-lg"
                 >
