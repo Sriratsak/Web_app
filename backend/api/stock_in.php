@@ -9,50 +9,75 @@ header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type");
 header("Access-Control-Allow-Credentials: true");
 
-if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') { http_response_code(200); exit; }
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    http_response_code(200);
+    exit;
+}
 
 require_once "../Database.php";
-require_once "../Model/StockIn.php";
+require_once "../models/StockIn.php";
 
-$db    = (new Database())->getConnection();
+$db = (new Database())->getConnection();
 $stock = new StockIn($db);
 
 $method = $_SERVER['REQUEST_METHOD'];
-$uri    = $_SERVER['REQUEST_URI'];
-$data   = json_decode(file_get_contents("php://input"), true) ?? [];
+$data = json_decode(file_get_contents("php://input"), true) ?? [];
 
-$id = null;
-if (preg_match('#/stock_in\.php/([0-9]+)$#', $uri, $m)) {
-    $id = $m[1];
-}
-
-// ✅ ดึง user_id จาก session
+// ✅ เอา user จาก session
 $user_id = $_SESSION['user_id'] ?? 1;
 
-if ($method == "GET") {
-    echo json_encode($id ? $stock->getById($id) : $stock->getAll());
+// ---------------- GET ----------------
+if ($method === "GET") {
+    echo json_encode($stock->getAll());
 }
 
-if ($method == "POST") {
+// ---------------- POST (เพิ่มข้อมูล) ----------------
+if ($method === "POST") {
+
+    if (!isset($data['prod_id']) || !isset($data['quantity'])) {
+        echo json_encode(["status" => false, "message" => "ข้อมูลไม่ครบ"]);
+        exit;
+    }
+
     $result = $stock->create(
-        $data['prod_id']  ?? '',
-        $data['quantity'] ?? '',
+        $data['prod_id'],
+        $data['quantity'],
         $user_id
     );
+
     echo json_encode($result);
 }
 
-if ($method == "PUT" && $id) {
+// ---------------- PUT ----------------
+if ($method === "PUT") {
+    $id = $data['id'] ?? null;
+
+    if (!$id) {
+        echo json_encode(["status" => false, "message" => "ไม่มี id"]);
+        exit;
+    }
+
     $result = $stock->update(
         $id,
-        $data['prod_id']  ?? '',
-        $data['quantity'] ?? '',
+        $data['prod_id'],
+        $data['quantity'],
         $user_id,
         $data['date'] ?? date("Y-m-d")
     );
+
     echo json_encode(["success" => $result]);
 }
 
-if ($method == "DELETE" && $id) {
-    echo json_encode(["success" => $stock->delete($id)]);
+// ---------------- DELETE ----------------
+if ($method === "DELETE") {
+    $id = $_GET['id'] ?? null;
+
+    if (!$id) {
+        echo json_encode(["status" => false, "message" => "ไม่มี id"]);
+        exit;
+    }
+
+    echo json_encode([
+        "success" => $stock->delete($id)
+    ]);
 }

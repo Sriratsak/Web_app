@@ -12,7 +12,12 @@ class StockIn {
                 JOIN product p ON si.prod_id = p.prod_id
                 JOIN user u ON si.user_id = u.user_id
                 ORDER BY si.stockin_id DESC";
-        return $this->conn->query($sql)->fetchAll(PDO::FETCH_ASSOC);
+        $rows = $this->conn->query($sql)->fetchAll(PDO::FETCH_ASSOC);
+
+foreach ($rows as &$row) {
+    $row['quantity'] = (int)$row['quantity']; // 🔥 แปลงเป็น integer
+}
+return $rows;
     }
 
     public function getById($id) {

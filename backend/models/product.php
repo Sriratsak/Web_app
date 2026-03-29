@@ -8,17 +8,31 @@ class Product
         $this->conn = $db;
     }
 
-    // GET ALL
-    public function getAll(){
-        $stmt = $this->conn->prepare("
-            SELECT p.*, c.cat_name 
-            FROM " . $this->table . " p
-            LEFT JOIN category c ON p.cat_id = c.cat_id
-        ");
-        $stmt->execute();
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
-    }
+public function getAll(){
+    $stmt = $this->conn->prepare("
+        SELECT 
+            p.*,
+            c.cat_name,
+            IFNULL(si.total_in,0) - IFNULL(so.total_out,0) AS quantity
 
+        FROM product p
+        LEFT JOIN category c ON p.cat_id = c.cat_id
+
+        LEFT JOIN (
+            SELECT prod_id, SUM(quantity) AS total_in
+            FROM stock_in
+            GROUP BY prod_id
+        ) si ON p.prod_id = si.prod_id
+
+        LEFT JOIN (
+            SELECT prod_id, SUM(quantity) AS total_out
+            FROM stock_out
+            GROUP BY prod_id
+        ) so ON p.prod_id = so.prod_id
+    ");
+    $stmt->execute();
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
     // GET BY ID
     public function getById($id){
         $stmt = $this->conn->prepare("
