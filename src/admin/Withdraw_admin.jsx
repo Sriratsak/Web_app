@@ -8,7 +8,7 @@ const api = axios.create({
   withCredentials: true,
 });
 
-export default function Withdraw_admin(){
+export default function Withdraw_admin() {
   const [products, setProducts]           = useState([]);
   const [search, setSearch]               = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
