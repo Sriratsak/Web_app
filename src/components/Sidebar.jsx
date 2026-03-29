@@ -12,7 +12,7 @@ const menuItems = [
     activeShadow: "shadow-cyan-200",
   },
   {
-    to: "/receive",
+    to: "/Receive",
     label: "เบิกสินค้าออกจากคลัง",
     emoji: "📥",
     particles: ["🛒", "📦", "⬇️", "💨", "🌟", "🎁", "✨", "💫"],
