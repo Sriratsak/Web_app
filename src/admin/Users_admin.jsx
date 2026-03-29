@@ -31,7 +31,7 @@ export default function Users_admin() {
   return (
     <div className="flex">
       <Sidebar />
-      <div className="flex-1 p-6">
+     <div className="flex-1 flex flex-col">
         <Navbar />
 
         <h1 className="text-xl font-bold mb-4">จัดการผู้ใช้</h1>
