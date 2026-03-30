@@ -27,13 +27,14 @@ function Login() {
         // withCredentials: true = บอก axios ส่ง cookie / session ไปด้วย
         { withCredentials: true },
       );
-
+      console.log(response.data)
       if (response.data.success) {
         localStorage.setItem("user", JSON.stringify(response.data.user));
         if (response.data.user.role === "user") navigate("/withdraw");
         else if (response.data.user.role === "admin")
           navigate("/dashboard_admin");
       }
+
     } catch (error) {
       // ค่าเริ่มต้นถ้าติดต่อ Server ไม่ได้
       let mainTitle = "เข้าสู่ระบบไม่สำเร็จ";
