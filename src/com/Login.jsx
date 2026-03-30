@@ -32,13 +32,16 @@ function Login() {
         localStorage.setItem("user", JSON.stringify(response.data.user));
         if (response.data.user.role === "user") navigate("/withdraw");
         else if (response.data.user.role === "admin")
-          navigate("/dashboard_admin");
+          //ทำงานเป็นการส่งผู้ใช้ไปตาม path ต้องการ
+          navigate("/dashboard_admin"); 
       }
     } catch (error) {
       // ค่าเริ่มต้นถ้าติดต่อ Server ไม่ได้
+      //ต่างจาก const ที่ ไม่สามารถเปลี่ยนค่าได้หลังประกาศ
       let mainTitle = "เข้าสู่ระบบไม่สำเร็จ";
       let detailMsg = "เกิดข้อผิดพลาดในการเชื่อมต่อ โปรดลองใหม่อีกครั้ง";
-
+      
+      //ตรวจสอบก่อนว่า server ส่ง error message มาจริง ๆ
       if (error.response && error.response.data) {
         const serverMsg = error.response.data.message;
 
