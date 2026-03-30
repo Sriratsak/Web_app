@@ -8,7 +8,6 @@ const api = axios.create({
   withCredentials: true,
 });
 
-// 🕒 1. สร้างฟังก์ชันไว้นอก Component เพื่อให้เรียกใช้ได้ทันทีไม่ต้องรอ Render
 const getThaiToday = () => {
   return new Date().toLocaleDateString('sv-SE'); 
 };
@@ -22,8 +21,6 @@ export default function Receive() {
   const [history, setHistory] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [loading, setLoading] = useState(true);
-
-  // ✅ 2. แก้ตรงนี้: เซตค่าเริ่มต้นเป็นวันที่ปัจจุบันทันที (ห้ามใส่ "")
   const [filterDate, setFilterDate] = useState(getThaiToday());
 
   const fetchProducts = async () => {
@@ -47,10 +44,8 @@ export default function Receive() {
   };
 
   useEffect(() => {
-    // 🕒 3. อัปเดตเผื่อไว้กรณีเปิดเครื่องข้ามวัน
     const today = getThaiToday();
     setFilterDate(today); 
-
     fetchProducts();
     fetchHistory();
   }, []);
@@ -95,12 +90,12 @@ export default function Receive() {
 
   const confirmSubmit = async () => {
     try {
-      const currentToday = getThaiToday(); // ดึงวันที่ล่าสุดตอนกดปุ่ม
+      const currentToday = getThaiToday();
       for (let item of selectedItems) {
         await api.post("/stock_in.php", {
           prod_id: item.prod_id,
           quantity: Number(item.qty),
-          date: currentToday, // ✅ ส่งวันที่ปัจจุบันไปบันทึก
+          date: currentToday,
           note: note
         });
       }
@@ -116,7 +111,6 @@ export default function Receive() {
     }
   };
 
-  // กรองประวัติ: ตอนนี้ filterDate จะมีค่า "2026-03-30" ตั้งแต่เริ่มโหลด ทำให้ข้อมูลขึ้นทันที
   const filteredHistory = history.filter((item) => item.date === filterDate);
 
   return (
@@ -147,42 +141,48 @@ export default function Receive() {
                 </div>
               </div>
 
+              {/* ✅ ส่วนรายการสินค้า: เพิ่มเช็คหาไม่เจอ */}
               <div className="max-h-80 overflow-y-auto space-y-2 bg-gray-50 rounded-2xl p-4 mb-6 custom-scrollbar">
                 {loading ? (
                   <p className="text-center text-gray-400 py-10 font-kanit">กำลังโหลด...</p>
                 ) : filteredProducts.length === 0 ? (
-                  <p className="text-center text-gray-400 py-10 font-kanit">ไม่พบสินค้า</p>
-                ) : filteredProducts.map((item) => {
-                  const selected = selectedItems.find((i) => i.prod_id === item.prod_id);
-                  return (
-                    <div key={item.prod_id}
-                      className={`flex justify-between items-center p-3 rounded-2xl border-2 transition-all ${selected ? "bg-white border-green-500 shadow-md" : "bg-transparent border-transparent"}`}>
-                      <div className="flex items-center gap-4 cursor-pointer select-none" onClick={() => toggleProduct(item)}>
-                        <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all ${selected ? "bg-green-500 border-green-500" : "border-gray-300"}`}>
-                          {selected && <div className="w-2 h-2 bg-white rounded-full" />}
+                  /* แสดงเมื่อค้นหาไม่พบ */
+                  <div className="text-center py-10 text-gray-400 font-kanit">
+                    <p className="text-4xl mb-2">🔍</p>
+                    <p>ไม่พบสินค้าที่ตรงกับ "{search}"</p>
+                  </div>
+                ) : (
+                  filteredProducts.map((item) => {
+                    const selected = selectedItems.find((i) => i.prod_id === item.prod_id);
+                    return (
+                      <div key={item.prod_id}
+                        className={`flex justify-between items-center p-3 rounded-2xl border-2 transition-all ${selected ? "bg-white border-green-500 shadow-md" : "bg-transparent border-transparent"}`}>
+                        <div className="flex items-center gap-4 cursor-pointer select-none" onClick={() => toggleProduct(item)}>
+                          <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all ${selected ? "bg-green-500 border-green-500" : "border-gray-300"}`}>
+                            {selected && <div className="w-2 h-2 bg-white rounded-full" />}
+                          </div>
+                          <div>
+                            <p className="font-bold text-sm">{item.prod_name}</p>
+                            <p className="text-xs text-gray-400">{item.cat_name} · ราคา {item.prod_price} บาท</p>
+                          </div>
                         </div>
-                        <div>
-                          <p className="font-bold text-sm">{item.prod_name}</p>
-                          <p className="text-xs text-gray-400">{item.cat_name} · ราคา {item.prod_price} บาท</p>
-                        </div>
+                        {selected && (
+                          <div className="flex items-center gap-2">
+                            <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wider pl-2">จำนวน:</span>
+                            <input 
+                              type="text" 
+                              inputMode="numeric" 
+                              value={selected.qty}
+                              placeholder="0"
+                              onChange={(e) => updateQty(item.prod_id, e.target.value)}
+                              className="w-14 bg-gray-100 border-0 px-1 py-1.5 rounded-xl text-center font-black text-green-600 focus:ring-2 focus:ring-green-500 outline-none transition-all shadow-inner font-kanit"
+                            />
+                          </div>
+                        )}
                       </div>
-                      
-                      {selected && (
-                        <div className="flex items-center gap-2">
-                          <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wider pl-2">จำนวน:</span>
-                          <input 
-                            type="text" 
-                            inputMode="numeric" 
-                            value={selected.qty}
-                            placeholder="0"
-                            onChange={(e) => updateQty(item.prod_id, e.target.value)}
-                            className="w-14 bg-gray-100 border-0 px-1 py-1.5 rounded-xl text-center font-black text-green-600 focus:ring-2 focus:ring-green-500 outline-none transition-all shadow-inner font-kanit"
-                          />
-                        </div>
-                      )}
-                    </div>
-                  );
-                })}
+                    );
+                  })
+                )}
               </div>
 
               <textarea placeholder="เขียนบันทึกเพิ่มเติม (ถ้ามี)..."
@@ -195,6 +195,7 @@ export default function Receive() {
               </button>
             </div>
 
+            {/* ฝั่งประวัติรับสินค้า */}
             <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-200 flex flex-col h-[650px]">
               <div className="flex justify-between items-center mb-6 flex-none">
                 <h3 className="font-bold text-lg">📜 ประวัติรับสินค้า</h3>
@@ -212,9 +213,11 @@ export default function Receive() {
                   <div key={i} className="bg-gray-50 p-4 rounded-2xl flex justify-between items-center hover:border-green-200 border border-gray-50 transition-all group shadow-sm hover:shadow-md">
                     <div>
                       <p className="font-bold text-gray-800">{item.prod_name}</p>
+                      {/* ✅ แก้ไขรูปแบบการแสดงผลตามที่คุณส่งตัวอย่างมา */}
                       <p className="text-[10px] text-gray-400 uppercase tracking-widest mt-0.5">
-                         👤 {item.user_name} · 📅 {item.date}
+                        👤 {item.user_name || "ไม่ระบุชื่อ"} · 📅 {item.date}
                       </p>
+                      {item.note && <p className="text-xs text-green-500 mt-2 bg-green-50 px-2 py-1 rounded-lg w-fit">📝 {item.note}</p>}
                     </div>
                     <div className="bg-green-100 text-green-700 px-4 py-2 rounded-2xl font-black group-hover:scale-110 transition-transform">
                       +{item.quantity}
@@ -227,50 +230,40 @@ export default function Receive() {
         </main>
       </div>
 
+      {/* Modal และ Style เหมือนเดิม... */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/40 backdrop-blur-md" onClick={() => setIsModalOpen(false)} />
           <div className="relative bg-white w-full max-w-md rounded-[2.5rem] shadow-2xl overflow-hidden animate-pop-in">
-            <div className="p-8">
+            <div className="p-8 text-center">
               <div className="w-20 h-20 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-6 text-3xl shadow-inner">✓</div>
-              <h3 className="text-2xl font-black text-center mb-2 font-kanit">ยืนยันรับเข้าสต็อก?</h3>
-              <p className="text-gray-400 text-center text-sm mb-6 font-kanit">กรุณาตรวจสอบรายการสินค้าที่เลือก</p>
-              <div className="bg-gray-50 rounded-3xl p-5 mb-8 max-h-52 overflow-y-auto border border-gray-100 text-sm">
+              <h3 className="text-2xl font-black mb-2 font-kanit">ยืนยันรับเข้าสต็อก?</h3>
+              <p className="text-gray-400 text-sm mb-6 font-kanit">กรุณาตรวจสอบรายการสินค้าที่เลือก</p>
+              <div className="bg-gray-50 rounded-3xl p-5 mb-8 max-h-52 overflow-y-auto border border-gray-100 text-left text-sm font-kanit">
                 {selectedItems.map((item) => (
-                  <div key={item.prod_id} className="flex justify-between py-2.5 border-b border-dashed border-gray-200 last:border-0 font-kanit">
+                  <div key={item.prod_id} className="flex justify-between py-2.5 border-b border-dashed border-gray-200 last:border-0">
                     <span className="text-gray-600 font-medium">{item.prod_name}</span>
                     <span className="font-bold text-green-600">+{item.qty} ชิ้น</span>
                   </div>
                 ))}
               </div>
-              <div className="flex gap-4 font-kanit">
-                <button onClick={() => setIsModalOpen(false)}
-                  className="flex-1 py-4 rounded-2xl border border-gray-200 font-bold text-gray-400 hover:bg-gray-50 transition-colors">
-                  ยกเลิก
-                </button>
-                <button onClick={confirmSubmit}
-                  className="flex-1 py-4 rounded-2xl bg-black text-white font-bold hover:bg-gray-800 transition-all shadow-lg active:scale-95">
-                  ยืนยันบันทึก
-                </button>
+              <div className="flex gap-4">
+                <button onClick={() => setIsModalOpen(false)} className="flex-1 py-4 rounded-2xl border border-gray-200 font-bold text-gray-400 font-kanit">ยกเลิก</button>
+                <button onClick={confirmSubmit} className="flex-1 py-4 rounded-2xl bg-black text-white font-bold shadow-lg font-kanit">ยืนยันบันทึก</button>
               </div>
             </div>
           </div>
         </div>
       )}
 
-      <style>{`
+      <style dangerouslySetInnerHTML={{ __html: `
         @import url('https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;700;800&display=swap');
         .font-kanit { font-family: 'Kanit', sans-serif; }
         .custom-scrollbar::-webkit-scrollbar { width: 5px; }
-        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #E5E7EB; border-radius: 10px; }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #D1D5DB; }
-        @keyframes pop-in {
-          0% { transform: scale(0.95); opacity: 0; }
-          100% { transform: scale(1); opacity: 1; }
-        }
+        @keyframes pop-in { 0% { transform: scale(0.95); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
         .animate-pop-in { animation: pop-in 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
-      `}</style>
+      ` }} />
     </div>
   );
 }

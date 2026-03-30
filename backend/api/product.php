@@ -48,7 +48,7 @@ echo json_encode($data);
     }
 }
 
-// ------------------ CREATE ------------------
+// ------------------ POST ------------------
 if($method === "POST" && !$id){
     $prod_name = $data['prod_name'] ?? '';
     $prod_price = $data['prod_price'] ?? 0;
@@ -63,7 +63,7 @@ if($method === "POST" && !$id){
     }
 }
 
-// ------------------ UPDATE ------------------
+// ------------------ PUT ------------------
 if($method === "PUT" && $id){
     $prod_name = $data['prod_name'] ?? '';
     $prod_price = $data['prod_price'] ?? 0;
