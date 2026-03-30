@@ -1,4 +1,4 @@
-v// นำเข้า Module ที่จำเป็น
+// นำเข้า Module ที่จำเป็น
 import { Link, useNavigate } from "react-router-dom"; // Link: สำหรับสร้างลิงก์ไปหน้าอื่น, useNavigate: เปลี่ยนหน้าแบบ programmatically
 import { useState } from "react"; // useState: ใช้จัดการ state ของ component
 import axios from "axios"; // axios: สำหรับทำ HTTP request ไป backend
