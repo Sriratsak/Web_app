@@ -1,18 +1,12 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-
-// 🔥 Admin pages
 import Dashboard_admin from "./admin/Dashboard_admin";
 import Products_admin from "./admin/Products_admin";
 import StockReport_admin from "./admin/StockReport_admin";
 // import Withdraw_admin from "./admin/Withdraw_admin";
 // import Receive_admin from "./admin_admin";
 import Users_admin from "./admin/Users_admin"; 
-
-// 🔥 User pages
 import Withdraw from "./pages/Withdraw";
 import Receive from "./pages/Receive";
-
-// 🔥 Auth
 import Login from "./com/Login";
 import Register from "./com/Register";
 
@@ -21,20 +15,18 @@ function App() {
     <BrowserRouter>
       <Routes>
 
-        {/* 🔐 Auth */}
+        {/* Auth */}
         <Route path="/" element={<Login />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
 
-        {/* 👑 Admin */}
+        {/* Admin */}
         <Route path="/dashboard_admin" element={<Dashboard_admin />} />
         <Route path="/products_admin" element={<Products_admin />} />
-        {/* <Route path="/withdraw_admin" element={<Withdraw_admin />} /> */}
-        {/* <Route path="_admin" element={<Receive_admin />} />?v */}
         <Route path="/users_admin" element={<Users_admin />} /> 
         <Route path="/StockReport_admin" element={<StockReport_admin />} /> 
 
-        {/* 👤 User */}
+        {/* User */}
         <Route path="/withdraw" element={<Withdraw />} />
         <Route path="/Receive" element={<Receive/>} />
 
