@@ -1,8 +1,4 @@
 <?php
-header("Access-Control-Allow-Origin: *"); // อนุญาตทุก origin
-header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
-header("Access-Control-Allow-Headers: Content-Type");
-
 // ส่วนโค้ดของคุณต่อ
 class Category
 {

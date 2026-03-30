@@ -7,21 +7,16 @@ class Dashboard {
     }
 
     public function getSummary() {
-        // 1. จำนวนรายการสินค้าทั้งหมด
+        
         $stmt1 = $this->db->query("SELECT COUNT(*) as total_items FROM product");
         $total_items = $stmt1->fetch(PDO::FETCH_ASSOC)['total_items'];
 
-        // 2. มูลค่าคงคลัง (ใช้ราคา x จำนวนคงเหลือ จะแม่นยำกว่าจ้า)
-        // 💡 อ้วงเช็คชื่อคอลัมน์ราคา (prod_price) และจำนวน (prod_capacity) ให้ดีนะจ๊ะ
         $stmt2 = $this->db->query("SELECT SUM(prod_price * prod_capacity) as total_value FROM product");
         $total_value = $stmt2->fetch(PDO::FETCH_ASSOC)['total_value'] ?? 0;
 
-        // 3. สินค้าใกล้หมด (<= 5)
         $stmt3 = $this->db->query("SELECT COUNT(*) as low_stock_count FROM product WHERE prod_capacity <= 5");
         $low_stock_count = $stmt3->fetch(PDO::FETCH_ASSOC)['low_stock_count'];
 
-        // 4. ธุรกรรมวันนี้ (นับจำนวนรายการที่มีวันที่เท่ากับวันนี้)
-        // 🚀 ใช้ DATE(date) = CURDATE() เพื่อความแม่นยำ 100%
         $sql_trans = "SELECT 
             (SELECT COUNT(*) FROM stock_in WHERE DATE(date) = CURDATE()) + 
             (SELECT COUNT(*) FROM stock_out WHERE DATE(date) = CURDATE()) as daily_trans";
