@@ -46,12 +46,12 @@ class Member
             if (password_verify($password, $user['password'])) {
 
                 // 2. ถ้ารหัสผ่านถูกค่อยมาเช็คว่า "โดนระงับ" หรือไม่
-                // if ($user['status'] === 'suspended') {
-                //     return [
-                //         "success" => false,
-                //         "message" => "บัญชีของคุณถูกระงับการใช้งาน"
-                //     ];
-                // }
+                if ($user['status'] === 'suspended') {
+                    return [
+                        "success" => false,
+                        "message" => "บัญชีของคุณถูกระงับการใช้งาน"
+                    ];
+                }
 
                 // ถ้ารหัสถูกและไม่โดนระงับ ก็ให้ผ่าน
                 return ["success" => true, "user" => $user];
