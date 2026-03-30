@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 
 const menuItems = [
   {
-    to: "/withdraw",
+    to: "/Receive",
     label: "รับสินค้าเข้าคลัง",
     emoji: "📤",
     particles: ["🚚", "📦", "⬆️", "💨", "✨", "🎯", "⚡", "💥"],
@@ -12,7 +12,7 @@ const menuItems = [
     activeShadow: "shadow-cyan-200",
   },
   {
-    to: "/Receive",
+    to: "/withdraw",
     label: "เบิกสินค้าออกจากคลัง",
     emoji: "📥",
     particles: ["🛒", "📦", "⬇️", "💨", "🌟", "🎁", "✨", "💫"],
