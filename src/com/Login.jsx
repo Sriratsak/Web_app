@@ -30,7 +30,7 @@ function Login() {
       console.log(response.data)
       if (response.data.success) {
         localStorage.setItem("user", JSON.stringify(response.data.user));
-        if (response.data.user.role === "user") navigate("/withdraw");
+        if (response.data.user.role === "user") navigate("/Receive");
         else if (response.data.user.role === "admin")
           //ทำงานเป็นการส่งผู้ใช้ไปตาม path ต้องการ
           navigate("/dashboard_admin"); 

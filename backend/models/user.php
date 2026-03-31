@@ -30,9 +30,13 @@ $method = $_SERVER['REQUEST_METHOD'];
 // =======================
 // GET: ดึง users
 // =======================
+// =======================
+// GET: ดึง users (แก้ไขบรรทัดที่มี SELECT)
+// =======================
 if ($method === "GET") {
     try {
-        $stmt = $conn->prepare("SELECT user_id AS id, name AS username, email, tel, role FROM user");
+        // เพิ่ม status เข้าไปในคำสั่ง SELECT ด้านล่างนี้ครับ
+        $stmt = $conn->prepare("SELECT user_id AS id, name AS username, email, tel, role, status FROM user");
         $stmt->execute();
         $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
         echo json_encode($users);
