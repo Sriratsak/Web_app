@@ -107,8 +107,8 @@ export default function Users_admin() {
         <main className="p-8">
           <div className="flex justify-between items-center mb-8">
             <div>
-              <h2 className="text-3xl font-bold">จัดการรายชื่อลูกค้า</h2>
-              <p className="text-gray-500">ควบคุมสถานะและแก้ไขข้อมูลลูกค้าทั่วไป</p>
+              <h2 className="text-3xl font-bold">จัดการรายชื่อพนักงาน</h2>
+              <p className="text-gray-500">ควบคุมสถานะและแก้ไขข้อมูลพนักงานทั่วไป</p>
             </div>
             <div className="bg-white px-6 py-2 rounded-2xl shadow-sm border text-sm font-semibold">
               <span className="text-gray-400">Total Users: </span>
@@ -119,7 +119,7 @@ export default function Users_admin() {
           <div className="bg-white p-8 rounded-3xl shadow-sm border border-gray-100">
             <div className="mb-6">
               <input
-                placeholder="🔍 ค้นหาลูกค้า..."
+                placeholder="🔍 ค้นหาพนักงานอ..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 className="w-full max-w-md border border-gray-200 p-3 rounded-2xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all bg-gray-50/50"
@@ -190,7 +190,7 @@ export default function Users_admin() {
             <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
               <div className="bg-white p-8 rounded-3xl w-full max-w-md shadow-2xl scale-in-center">
                 <div className="flex justify-between items-center mb-6">
-                  <h2 className="text-2xl font-bold">แก้ไขข้อมูลลูกค้า</h2>
+                  <h2 className="text-2xl font-bold">แก้ไขข้อมูลพนักงาน</h2>
                   <button onClick={() => setEditUser(null)} className="text-gray-300 hover:text-gray-500 text-2xl">&times;</button>
                 </div>
 
